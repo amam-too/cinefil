@@ -39,7 +39,7 @@ export default async function MoviesGrid({movies, filmId, displayShown, forSugge
                     : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
             }` }
         >
-            { movies.length > 0 ? (
+            { movies?.length > 0 ? (
                 movies.map((movie: Movie) => (
                     // If the movie has been shown and displayShown is false, hide the movie (return null).
                     !displayShownBoolValue && moviesId.some((value: { tmdb_id: number; shown_at: string }) => value.tmdb_id === movie.id) ? null : (
