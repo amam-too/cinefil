@@ -12,7 +12,7 @@ export async function login(provider: Provider) {
     const {data, error} = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-            redirectTo: `${ headers().get('origin') }/api/auth/callback`
+            redirectTo: `${ process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://cinefil.byar.fr' }/api/auth/callback`
         }
     })
     
