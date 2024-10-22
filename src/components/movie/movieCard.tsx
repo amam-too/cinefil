@@ -10,8 +10,8 @@ import {getHumanReadableDate, getYearOnly} from "@/utils/date";
 import {SearchParams} from "@/app/searchParams";
 
 export default function MoviesCard(
-    {movie, hasBeenSuggested, shownOn}:
-        { movie: Movie; hasBeenSuggested: boolean; shownOn?: string | undefined }) {
+    {movie, hasBeenSuggested, shown_at}:
+        { movie: Movie; hasBeenSuggested: boolean; shown_at?: string | undefined }) {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
@@ -38,19 +38,19 @@ export default function MoviesCard(
                     <img
                         src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                         alt={movie.title}
-                        className={`rounded-lg p-4 ${shownOn ? 'grayscale opacity-50' : ''}`}
+                        className={`rounded-lg p-4 ${shown_at ? 'grayscale opacity-50' : ''}`}
                     />
                 </CardContent>
                 <CardHeader>
                     <CardTitle className={"text-xl"}>{movie.title}</CardTitle>
                     <p className="text-start text-sm text-gray-500">{getYearOnly(movie.release_date)}</p>
-                    {shownOn ? <p className="text-start text-sm text-red-500 font-bold pt-8">
-                        Diffusé lors de la séance du : {getHumanReadableDate(shownOn)}
+                    {shown_at ? <p className="text-start text-sm text-red-500 font-bold pt-8">
+                        Diffusé lors de la séance du : {getHumanReadableDate(shown_at)}
                     </p> : null}
                 </CardHeader>
             </div>
             <CardFooter>
-                {hasBeenSuggested || shownOn ? (
+                {hasBeenSuggested || shown_at ? (
                     <>{/* TODO : Add Vote Button. */}</>
                 ) : (
                     <SuggestButton movieDetails={movie as unknown as MovieDetails}/>

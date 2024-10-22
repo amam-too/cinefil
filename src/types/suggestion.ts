@@ -1,6 +1,6 @@
 export interface Suggestion {
     id: number;
     tmdb_id: number;
-    shownOn: string | null;
+    shown_at: string | null;
     createdAt: string;
 }

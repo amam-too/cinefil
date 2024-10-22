@@ -30,7 +30,7 @@ export default function SuggestButton({movieDetails}: { movieDetails: MovieDetai
     const createdSuggestion = async (movie: MovieDetails): Promise<void> => {
         const {error} = await createClient().from("suggestions").insert({
             tmdb_id: movie.id,
-            shownOn: null,
+            shown_at: null,
             createdAt: new Date().toISOString()
         });
         

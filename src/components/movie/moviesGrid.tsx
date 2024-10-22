@@ -13,12 +13,12 @@ export default async function MoviesGrid({movies, filmId, displayShown, forSugge
     /**
      * Fetch all movies that have been shown.
      */
-    const fetchShownMovies = async (): Promise<{ tmdb_id: number, shownOn: string }[]> => {
-        // Fetch only movies ids with non-null "shownOn".
+    const fetchShownMovies = async (): Promise<{ tmdb_id: number, shown_at: string }[]> => {
+        // Fetch only movies ids with non-null "shown_at".
         const {data, error} = await createClient()
             .from("suggestions")
-            .select("tmdb_id,  shownOn")
-            .not("shownOn", "is", null);
+            .select("tmdb_id,  shown_at")
+            .not("shown_at", "is", null);
         
         if (error) {
             console.error("Error fetching shown movies:", error);
@@ -28,7 +28,7 @@ export default async function MoviesGrid({movies, filmId, displayShown, forSugge
         return data
     };
     
-    const moviesId: { tmdb_id: number, shownOn: string }[] = await fetchShownMovies()
+    const moviesId: { tmdb_id: number, shown_at: string }[] = await fetchShownMovies()
     const displayShownBoolValue: boolean = displayShown === 'true' || false;
     
     return (
@@ -39,15 +39,15 @@ export default async function MoviesGrid({movies, filmId, displayShown, forSugge
                     : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
             }` }
         >
-            { movies ? (
+            { movies.length > 0 ? (
                 movies.map((movie: Movie) => (
                     // If the movie has been shown and displayShown is false, hide the movie (return null).
-                    !displayShownBoolValue && moviesId.some((value: { tmdb_id: number; shownOn: string }) => value.tmdb_id === movie.id) ? null : (
+                    !displayShownBoolValue && moviesId.some((value: { tmdb_id: number; shown_at: string }) => value.tmdb_id === movie.id) ? null : (
                         <MoviesCard
                             key={ movie.id }
                             movie={ movie }
                             hasBeenSuggested={ forSuggestions }
-                            shownOn={ moviesId.find((value: { tmdb_id: number; shownOn: string }) => value.tmdb_id === movie.id)?.shownOn }
+                            shown_at={ moviesId.find((value: { tmdb_id: number; shown_at: string }) => value.tmdb_id === movie.id)?.shown_at }
                         />
                     )
                 ))
