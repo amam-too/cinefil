@@ -17,14 +17,6 @@ export default async function LoginPage() {
                     <form className="flex flex-col gap-2">
                         <Button variant="outline" className="flex gap-2 p-2 items-center" formAction={ () => {
                             "use server"
-                            return login("github");
-                        } }><GitHubLogoIcon/> Sign in with GitHub</Button>
-                        <Button variant="outline" className="flex gap-2 p-2 items-center" formAction={ () => {
-                            "use server"
-                            return login("google");
-                        } }> Sign in with Google</Button>
-                        <Button variant="outline" className="flex gap-2 p-2 items-center" formAction={ () => {
-                            "use server"
                             return login("discord");
                         } }><DiscordLogoIcon/> Sign in with Discord</Button>
                     </form>
