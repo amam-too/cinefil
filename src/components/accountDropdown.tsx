@@ -1,4 +1,4 @@
-import { signOut } from "@/app/(unprotected)/login/actions";
+import { signOut } from "@/app/login/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
