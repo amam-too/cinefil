@@ -18,11 +18,11 @@ export function createClient() {
                             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                             cookieStore.set(name, value, options)
                         )
-                    } catch {
+                    } catch (e) {
                         // The `setAll` method was called from a Server Component.
                         // This can be ignored if you have middleware refreshing
                         // user sessions.
-                        console.log('Error setting cookies')
+                        console.log(`Error setting cookies. More info ${JSON.stringify(e)}`)
                     }
                 }
             }

@@ -1,6 +1,6 @@
 "use server";
 
-import { login } from "@/app/(unprotected)/login/actions";
+import { login } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
