@@ -11,20 +11,30 @@ import Link from "next/link";
  * @constructor
  */
 export default async function AccountDropdown() {
-    const supabase = createClient()
-    
-    const {data: {user}} = await supabase.auth.getUser() as { data: { user: User | null } };
-    
-    return user ? (
-            <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                    <Avatar>
-                        <AvatarImage src={ `${ user.user_metadata.avatar_url }` }/>
-                        <AvatarFallback>?</AvatarFallback> </Avatar>
-                    <b>{ user?.user_metadata.name }</b>
-                </div>
-                <form><Button variant="outline" formAction={ signOut }>Sign out</Button></form>
-            </div>
-        ) :
-        <Link href={ "/login" }><Button variant="outline">Sign in</Button></Link>
+  const supabase = createClient();
+
+  const {
+    data: { user },
+  } = (await supabase.auth.getUser()) as { data: { user: User | null } };
+
+  return user ? (
+    <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
+        <Avatar>
+          <AvatarImage src={`${user.user_metadata.avatar_url}`} />
+          <AvatarFallback>?</AvatarFallback>{" "}
+        </Avatar>
+        <b>{user?.user_metadata.name}</b>
+      </div>
+      <form>
+        <Button variant="outline" formAction={signOut}>
+          Sign out
+        </Button>
+      </form>
+    </div>
+  ) : (
+    <Link href={"/login"}>
+      <Button variant="outline">Sign in</Button>
+    </Link>
+  );
 }
