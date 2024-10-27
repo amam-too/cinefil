@@ -17,7 +17,7 @@ export async function login(provider: Provider) {
     })
     
     if (error) {
-        console.log(error)
+        console.log(`An error occurred while logging in the user. More info: ${ JSON.stringify(error) }`)
     } else {
         redirect(data.url)
     }
