@@ -18,11 +18,11 @@ export default function VoteButton({movieId}: { movieId: number }) {
                 success: (response) => {
                     setHasVoted(true);
                     setLoading(false);
-                    return response.message;
+                    return response.message ?? "A voté !";
                 },
-                error: (error) => {
+                error: (error: Error) => {
                     setLoading(false);
-                    return error.message
+                    return error.message ?? "Une erreur est survenue, merci de réessayer ultérieurement.";
                 }
             });
         } }>
