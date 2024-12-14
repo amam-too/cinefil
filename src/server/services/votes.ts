@@ -1,5 +1,7 @@
+"use server"
+
 import { type VoteForMovieResponse } from "@/types/responses";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/server";
 
 /**
  * Votes for one movie.
@@ -12,20 +14,13 @@ export async function voteForMovie(tmdb_id: string): Promise<VoteForMovieRespons
     const {data: session, error: sessionError} = await supabase.auth.getUser();
     
     if (sessionError || !session) {
-        console.error(sessionError)
-        return {
-            success: false,
-            message: "Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter."
-        }
+        throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
     }
     
     const numberOfVotes = await getNumberOfVotesForCurrentUser(session.user.id);
     
     if (numberOfVotes >= 3) {
-        return {
-            success: false,
-            message: "Tu as déjà voté pour 3 films. Tu ne peux plus voter."
-        }
+        throw new Error("Tu as déjà voté pour 3 films. Tu ne peux plus voter.");
     }
     
     const { error } = await supabase
@@ -36,11 +31,7 @@ export async function voteForMovie(tmdb_id: string): Promise<VoteForMovieRespons
       });
     
     if (error) {
-        console.error(error)
-        return {
-            success: false,
-            message: "Une erreur est survenue, merci de réessayer ultérieurement. Le vote n'a pas été pris en compte."
-        }
+        throw new Error("Une erreur est survenue, merci de réessayer ultérieurement. Le vote n'a pas été pris en compte.");
     }
     
     return {
