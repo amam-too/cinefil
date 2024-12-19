@@ -41,7 +41,7 @@ export default async function Suggestions({displayShown}: {
     
     return (
         <div className="flex flex-col">
-            <h1 className="text-2xl font-bold text-center mt-4">Suggestions des utilisateurs</h1>
+            <h1 className="text-2xl font-bold mt-4 ml-8">Suggestions des utilisateurs</h1>
             <Suspense>
                 <MoviesGrid movies={ await fetchSuggestions() as unknown[] as Movie[] } forSuggestions={ true }
                             displayShown={ displayShown }/>
