@@ -5,7 +5,7 @@ import React, { Suspense } from "react";
 export async function DiscoverGrid() {
     const discoverMovies = await getDiscoverMovies();
     
-    if (!discoverMovies || !discoverMovies.results) {
+    if (!discoverMovies?.results) {
         return null;
     }
     

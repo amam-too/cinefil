@@ -3,7 +3,7 @@ import MovieDetails from "@/components/movie/movieDetails";
 import MoviesGrid from "@/components/movie/moviesGrid";
 import SearchConfig from "@/components/searchConfig";
 import Suggestions from "@/components/suggestions";
-import { getDiscoverMovies, searchMovies } from "@/server/services/tmdb";
+import { searchMovies } from "@/server/services/tmdb";
 import { Suspense } from "react";
 
 export default async function HomePage({
