@@ -1,7 +1,7 @@
 "use server";
 import CloseDetailsButton from "@/components/customButtons/closeDetailsButton";
-import SuggestButton from "@/components/customButtons/suggestButton";
 import MoviesCard from "@/components/movie/movieCard";
+import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { getMovieDetails, getSuggestions } from "@/server/services/tmdb";
 import { getYearOnly } from "@/utils/date";
@@ -78,7 +78,7 @@ export default async function MovieDetails({filmId}: { filmId: number }) {
                     </Suspense>
                 </CardContent>
                 <CardFooter className="mt-4">
-                    <SuggestButton movieDetails={ movieDetails }/>
+                    <ProposeMovieManager movieDetails={ movieDetails }/>
                 </CardFooter>
             </div>
         </Card>
