@@ -21,19 +21,19 @@ export default async function MoviesCard({movie, hasBeenProposed, shown_at}: Mov
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
-    
+
     const selectMovie = useDebouncedCallback((filmId: number): void => {
         const params = new URLSearchParams(searchParams);
-        
+
         if (filmId) {
             params.set(SearchParams.FILM_ID, filmId.toString());
         } else {
             params.delete(SearchParams.FILM_ID);
         }
-        
+
         router.replace(`${ pathname }?${ params.toString() }`);
     }, 300);
-    
+
     return (
         <Card
             className="cursor-pointer flex flex-col justify-between "
@@ -47,7 +47,7 @@ export default async function MoviesCard({movie, hasBeenProposed, shown_at}: Mov
                         alt={ movie.title }
                         className={ `rounded-lg rounded-b-none max-h-40 object-cover h-full w-full ${ shown_at ? 'grayscale opacity-50' : '' }` }
                     />
-                    
+
                     <div className="p-2 px-3">
                         <h1 className="font-semibold text-lg">{ movie.title }</h1>
                         <p className="text-start text-sm text-gray-500">{ getYearOnly(movie.release_date) }</p>
@@ -58,6 +58,9 @@ export default async function MoviesCard({movie, hasBeenProposed, shown_at}: Mov
                 </CardContent>
             </div>
             <CardFooter className="p-4 pb-4">
+              <DeleteSuggestionButton
+                movieDetails={movie as unknown as MovieDetails}
+              />
                 { hasBeenSuggested || shown_at ? (
                     <>
                         <VoteButton movieId={ movie.id }/>

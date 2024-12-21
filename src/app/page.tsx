@@ -14,7 +14,7 @@ export default async function HomePage({
     const query: string = searchParams?.query ?? "";
     const filmId: string | undefined = searchParams?.filmId;
     const displayShown: string | undefined = searchParams?.displayShown;
-    
+
     return (
         <main className="flex flex-col justify-center p-4 text-white">
             <SearchConfig/>
@@ -31,14 +31,14 @@ export default async function HomePage({
                         />
                     </Suspense>
                 ) }
-                
+
                 { filmId ? (
                     <Suspense key={ filmId } fallback={ <div>Loading details...</div> }>
                         <MovieDetails filmId={ Number(filmId) }/>
                     </Suspense>
                 ) : null }
             </div>
-            
+
             <DiscoverGrid/>
         </main>
     );

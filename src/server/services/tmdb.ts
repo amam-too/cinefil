@@ -6,6 +6,8 @@ import { type Movie, type MovieDetails, type Search, TMDB } from "tmdb-ts";
 const LOCALE = "fr-FR";
 
 const tmdb = new TMDB(process.env.TMDB_API_TOKEN!);
+
+// Rate limiter configuration : limit to 15 requests per minute.
 const rateLimiter = new RateLimiterMemory({
     points: 30,
     duration: 60
