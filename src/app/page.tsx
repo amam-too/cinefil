@@ -2,7 +2,7 @@ import { DiscoverGrid } from "@/components/discoverGrid";
 import MovieDetails from "@/components/movie/movieDetails";
 import MoviesGrid from "@/components/movie/moviesGrid";
 import SearchConfig from "@/components/searchConfig";
-import Propositions from "@/components/propositions";
+import Propositions from "@/components/propositions/propositions";
 import { searchMovies } from "@/server/services/tmdb";
 import { Suspense } from "react";
 
