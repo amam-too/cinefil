@@ -1,9 +1,8 @@
 "use client";
 
 import { SearchParams } from "@/app/searchParams";
-import SuggestButton from "@/components/customButtons/suggestButton";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getSuggestions } from "@/server/services/tmdb";
+import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getHumanReadableDate, getYearOnly } from "@/utils/date";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
@@ -63,7 +62,7 @@ export default async function MoviesCard({movie, hasBeenSuggested, shown_at}: Mo
                         Vote
                     </>
                 ) : (
-                    <SuggestButton movieDetails={ movie as unknown as MovieDetails }/>
+                    <ProposeMovieManager movieDetails={ movie as unknown as MovieDetails }/>
                 ) }
             </CardFooter>
         </Card>
