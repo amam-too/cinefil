@@ -11,7 +11,11 @@
 
 ---
 
-L'application CinéFIL est une application intuitive dédiée aux adhérent du cinéma CinéFIL, qui permet de rester informé des prochaines séances et de s'inscrire à la newsletter pour ne manquer aucun événement. Mais aussi rechercher des films pour obtenir des informations détaillées ou pour les proposer à la diffusion, tout en consultant le classement des films suggérés par la communauté. Cette application permet également de voter pour vos films préférés et visualiser l'historique des films déjà diffusés. 
+L'application CinéFIL est une application intuitive dédiée aux adhérents du cinéma CinéFIL, qui permet de rester informé
+des prochaines séances et de s'inscrire à la newsletter pour ne manquer aucun événement. Mais aussi rechercher des films
+pour obtenir des informations détaillées ou pour les proposer à la diffusion, tout en consultant le classement des films
+suggérés par la communauté. Cette application permet également de voter pour vos films préférés et visualiser
+l'historique des films déjà diffusés.
 
 ---
 

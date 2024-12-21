@@ -8,7 +8,7 @@ import { Suspense } from "react";
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams?: { query?: string; filmId?: string; displayShown?: string };
+  searchParams?: { query?: string; filmId?: string; displayShown?: string }
 }) {
   const query: string = searchParams?.query ?? "";
   const filmId: string | undefined = searchParams?.filmId;
