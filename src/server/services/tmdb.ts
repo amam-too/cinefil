@@ -1,35 +1,23 @@
 "use server";
-import {
-  type AlternativeTitles,
-  type Changes,
-  type Credits,
-  type ExternalIds,
-  type Images,
-  type Keywords,
-  type Movie,
-  type MovieChangeValue,
-  type MovieDetails,
-  type MovieLists,
-  type Recommendations,
-  type ReleaseDates,
-  type Reviews,
-  type Search,
-  type SimilarMovies,
-  TMDB,
-  type Translations,
-  type Videos,
-  type WatchProviders,
-} from "tmdb-ts";
+
 import { RateLimiterMemory } from "rate-limiter-flexible";
+import { type Movie, type MovieDetails, type Search, TMDB } from "tmdb-ts";
 
-const LOCALE = "fr";
-const tmdb: TMDB = new TMDB(process.env.TMDB_API_TOKEN!);
+const LOCALE = "fr-FR";
 
-// Rate limiter configuration : limit to 15 requests per minute.
+const tmdb = new TMDB(process.env.TMDB_API_TOKEN!);
 const rateLimiter = new RateLimiterMemory({
-  points: 15, // Number of requests.
-  duration: 60, // Per 60 seconds (1 minute).
+  points: 15,
+  duration: 60,
 });
+
+const handleRateLimit = async (key: string | number) => {
+  try {
+    await rateLimiter.consume(key);
+  } catch {
+    throw new Error("Too many requests, please try again later.");
+  }
+};
 
 /**
  * TMDB Service to search for movies.
@@ -37,14 +25,7 @@ const rateLimiter = new RateLimiterMemory({
  */
 export const searchMovies = async (query: string): Promise<Search<Movie>> => {
   // Use rate limiter to prevent excessive calls.
-  try {
-    await rateLimiter.consume(query);
-
-    // Will throw an error if rate limit exceeded.
-  } catch (rateLimitError) {
-    throw new Error("Too many requests, please try again later.");
-  }
-
+  await handleRateLimit(query);
   try {
     // Call the TMDB API.
     return await tmdb.search.movies({ query });
@@ -59,43 +40,41 @@ export const searchMovies = async (query: string): Promise<Search<Movie>> => {
  * TMDB Service to get details for a given movie.
  * @param id
  */
-export const getMovieDetails = async (
-  id: number,
-): Promise<
-  | (MovieDetails & { credits: Omit<Credits, "id"> } & {
-      videos: Omit<Videos, "id">
-    } & { images: Omit<Images, "id"> } & {
-      recommendations: Recommendations
-    } & { reviews: Omit<Reviews, "id"> } & {
-      reviews: Omit<Translations, "id">
-    } & { changes: Changes<MovieChangeValue> } & {
-      keywords: Omit<Keywords, "id">
-    } & { lists: Omit<MovieLists, "id"> } & {
-      release_dates: Omit<ReleaseDates, "id">
-    } & { alternative_titles: Omit<AlternativeTitles, "id"> } & {
-      external_ids: Omit<ExternalIds, "id">
-    } & {
-      translations: Omit<Translations, "id">
-    } & { "watch/providers": Omit<WatchProviders, "id"> } & object & {
-        similar: SimilarMovies
-      })
-  | (MovieDetails & object)
-> => {
+export const getMovieDetails = async (id: number): Promise<MovieDetails> => {
   // Use rate limiter to prevent excessive calls.
-  try {
-    await rateLimiter.consume(id);
-
-    // Will throw an error if rate limit exceeded.
-  } catch (rateLimitError) {
-    throw new Error("Too many requests, please try again later.");
-  }
-
+  await handleRateLimit(id);
   try {
     // Call the TMDB API.
     return await tmdb.movies.details(id, undefined, LOCALE);
   } catch (err) {
     // Handle TMDB API errors.
-    console.error("Error fetching movies:", err);
+    console.error("Error fetching movie details:", err);
     throw new Error("Failed to get details for movie from TMDB.");
+  }
+};
+
+export const getDiscoverMovies = async (): Promise<Search<Movie>> => {
+  // Use rate limiter to prevent excessive calls.
+  await handleRateLimit("discover");
+  try {
+    // Call the TMDB API.
+    return await tmdb.discover.movie({ language: LOCALE });
+  } catch (err) {
+    // Handle TMDB API errors.
+    console.error("Error fetching discover movies:", err);
+    throw new Error("Failed to fetch discover movies from TMDB.");
+  }
+};
+
+export const getSuggestions = async (id: number): Promise<Search<Movie>> => {
+  // Use rate limiter to prevent excessive calls.
+  await handleRateLimit(id);
+  try {
+    // Call the TMDB API.
+    return await tmdb.movies.similar(id, { language: LOCALE });
+  } catch (err) {
+    // Handle TMDB API errors.
+    console.error("Error fetching suggestions:", err);
+    throw new Error("Failed to get suggestions for movie from TMDB.");
   }
 };

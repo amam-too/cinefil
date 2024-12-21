@@ -1,3 +1,4 @@
+import { DiscoverGrid } from "@/components/discoverGrid";
 import MovieDetails from "@/components/movie/movieDetails";
 import MoviesGrid from "@/components/movie/moviesGrid";
 import SearchConfig from "@/components/searchConfig";
@@ -15,7 +16,7 @@ export default async function HomePage({
   const displayShown: string | undefined = searchParams?.displayShown;
 
   return (
-    <main className="flex flex-col items-center justify-center p-4 text-white">
+    <main className="flex flex-col justify-center p-4 text-white">
       <SearchConfig />
       <div className="flex flex-row items-start justify-center">
         {!query ? (
@@ -37,6 +38,8 @@ export default async function HomePage({
           </Suspense>
         ) : null}
       </div>
+
+      <DiscoverGrid />
     </main>
   );
 }

@@ -1,30 +1,26 @@
 "use client";
 
+import { SearchParams } from "@/app/searchParams";
 import SuggestButton from "@/components/customButtons/suggestButton";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { getHumanReadableDate, getYearOnly } from "@/utils/date";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React from "react";
 import { type Movie, type MovieDetails } from "tmdb-ts";
 import { useDebouncedCallback } from "use-debounce";
-import React from "react";
-import { getHumanReadableDate, getYearOnly } from "@/utils/date";
-import { SearchParams } from "@/app/searchParams";
 import DeleteSuggestionButton from "@/components/customButtons/deleteSuggestionButton";
 
-export default function MoviesCard({
+interface MovieCardProps {
+  movie: Movie
+  hasBeenSuggested: boolean
+  shown_at?: string
+}
+
+export default async function MoviesCard({
   movie,
   hasBeenSuggested,
   shown_at,
-}: {
-  movie: Movie
-  hasBeenSuggested: boolean
-  shown_at?: string | undefined
-}) {
+}: MovieCardProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -42,29 +38,33 @@ export default function MoviesCard({
   }, 300);
 
   return (
-    <Card key={movie.id}>
+    <Card
+      className="flex cursor-pointer flex-col justify-between"
+      key={movie.id}
+    >
       <div onClick={(): void => selectMovie(movie.id)}>
-        <CardContent>
+        <CardContent className="flex flex-col p-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
             alt={movie.title}
-            className={`rounded-lg p-4 ${shown_at ? "opacity-50 grayscale" : ""}`}
+            className={`h-full max-h-40 w-full rounded-lg rounded-b-none object-cover ${shown_at ? "opacity-50 grayscale" : ""}`}
           />
-        </CardContent>
-        <CardHeader>
-          <CardTitle className={"text-xl"}>{movie.title}</CardTitle>
-          <p className="text-start text-sm text-gray-500">
-            {getYearOnly(movie.release_date)}
-          </p>
-          {shown_at ? (
-            <p className="pt-8 text-start text-sm font-bold text-red-500">
-              Diffusé lors de la séance du : {getHumanReadableDate(shown_at)}
+
+          <div className="p-2 px-3">
+            <h1 className="text-lg font-semibold">{movie.title}</h1>
+            <p className="text-start text-sm text-gray-500">
+              {getYearOnly(movie.release_date)}
             </p>
-          ) : null}
-        </CardHeader>
+            {shown_at ? (
+              <p className="pt-8 text-start text-sm font-bold text-red-500">
+                Diffusé {getHumanReadableDate(shown_at)}
+              </p>
+            ) : null}
+          </div>
+        </CardContent>
       </div>
-      <CardFooter>
+      <CardFooter className="p-4 pb-4">
         {hasBeenSuggested || shown_at ? (
           <div className="flex flex-col space-y-4">
             {/* TODO : Add Vote Button. */}

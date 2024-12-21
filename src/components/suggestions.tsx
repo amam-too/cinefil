@@ -44,7 +44,7 @@ export default async function Suggestions({
 
   return (
     <div className="flex flex-col">
-      <h1 className="mt-4 text-center text-2xl font-bold">
+      <h1 className="ml-8 mt-4 text-center text-2xl font-bold">
         Suggestions des utilisateurs
       </h1>
       <Suspense>

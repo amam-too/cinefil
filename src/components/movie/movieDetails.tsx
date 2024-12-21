@@ -1,6 +1,7 @@
 "use server";
 import CloseDetailsButton from "@/components/customButtons/closeDetailsButton";
 import SuggestButton from "@/components/customButtons/suggestButton";
+import SuggestedMovies from "@/components/movie/movieSuggestions";
 import {
   Card,
   CardContent,
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { getMovieDetails } from "@/server/services/tmdb";
 import { getYearOnly } from "@/utils/date";
+import { Suspense } from "react";
 
 export default async function MovieDetails({ filmId }: { filmId: number }) {
   const movieDetails = await getMovieDetails(filmId);
@@ -76,6 +78,13 @@ export default async function MovieDetails({ filmId }: { filmId: number }) {
           <CardDescription className="mt-4 text-lg text-gray-200">
             {movieDetails.overview}
           </CardDescription>
+
+          {/* TODO : Add Cast and Crew */}
+          {/* TODO : Add Genres */}
+          {/* TODO : Add Similar Movies */}
+          <Suspense fallback={<div>Loading...</div>}>
+            <SuggestedMovies filmId={filmId} />
+          </Suspense>
         </CardContent>
         <CardFooter className="mt-4">
           <SuggestButton movieDetails={movieDetails} />
