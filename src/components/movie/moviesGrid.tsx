@@ -1,19 +1,23 @@
 "use server";
 import MoviesCard from "@/components/movie/movieCard";
 import { createClient } from "@/utils/supabase/server";
+import { Suspense } from "react";
 import { type Movie } from "tmdb-ts";
 
-export default async function MoviesGrid({movies, filmId, displayShown, forSuggestions}: {
+interface MovieGridProps {
     movies: Movie[];
     filmId?: number;
-    displayShown?: string | undefined,
+    displayShown?: string | undefined;
     forSuggestions: boolean;
-}) {
-    
+}
+
+export default async function MoviesGrid({movies, filmId, displayShown, forSuggestions}: MovieGridProps) {
     /**
      * Fetch all movies that have been shown.
      */
-    const fetchShownMovies = async (): Promise<{ tmdb_id: number, shown_at: string }[]> => {
+    const fetchShownMovies = async (): Promise<
+        { tmdb_id: number; shown_at: string }[]
+    > => {
         // Fetch only movies ids with non-null "shown_at".
         const {data, error} = await createClient()
             .from("suggestions")
@@ -25,35 +29,47 @@ export default async function MoviesGrid({movies, filmId, displayShown, forSugge
             return [];
         }
         
-        return data
+        return data;
     };
     
-    const moviesId: { tmdb_id: number, shown_at: string }[] = await fetchShownMovies()
-    const displayShownBoolValue: boolean = displayShown === 'true' || false;
+    const moviesId: { tmdb_id: number; shown_at: string }[] =
+        await fetchShownMovies();
+    const displayShownBoolValue: boolean = displayShown === "true" || false;
     
     return (
-        <div
-            className={ `grid w-full gap-6 p-10 ${
-                filmId
-                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
-            }` }
-        >
-            { movies?.length > 0 ? (
-                movies.map((movie: Movie) => (
-                    // If the movie has been shown and displayShown is false, hide the movie (return null).
-                    !displayShownBoolValue && moviesId.some((value: { tmdb_id: number; shown_at: string }) => value.tmdb_id === movie.id) ? null : (
-                        <MoviesCard
-                            key={ movie.id }
-                            movie={ movie }
-                            hasBeenSuggested={ forSuggestions }
-                            shown_at={ moviesId.find((value: { tmdb_id: number; shown_at: string }) => value.tmdb_id === movie.id)?.shown_at }
-                        />
+        <Suspense fallback={ <div>Loading...</div> }>
+            <div
+                className={ `grid w-full gap-6 p-10 ${
+                    filmId
+                        ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                        : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+                }` }
+            >
+                { movies?.length > 0 ? (
+                    movies.map((movie: Movie) =>
+                        // If the movie has been shown and displayShown is false, hide the movie (return null).
+                        !displayShownBoolValue &&
+                        moviesId.some(
+                            (value: { tmdb_id: number; shown_at: string }) =>
+                                value.tmdb_id === movie.id
+                        ) ? null : (
+                            <MoviesCard
+                                key={ movie.id }
+                                movie={ movie }
+                                hasBeenSuggested={ forSuggestions }
+                                shown_at={
+                                    moviesId.find(
+                                        (value: { tmdb_id: number; shown_at: string }) =>
+                                            value.tmdb_id === movie.id
+                                    )?.shown_at
+                                }
+                            />
+                        )
                     )
-                ))
-            ) : (
-                <> {/* TODO : Implement fallback. */ } </>
-            ) }
-        </div>
+                ) : (
+                    <> {/* TODO : Implement fallback. */ } </>
+                ) }
+            </div>
+        </Suspense>
     );
 }
