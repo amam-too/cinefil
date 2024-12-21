@@ -1,7 +1,7 @@
 "use client";
 
 import { SearchParams } from "@/app/searchParams";
-import SuggestButton from "@/components/customButtons/suggestButton";
+import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
 import VoteButton from "@/components/customButtons/voteButton";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getHumanReadableDate, getYearOnly } from "@/utils/date";
@@ -79,6 +79,7 @@ export default function MoviesCard({
               movieDetails={movie as unknown as MovieDetails}
               hasBeenSuggestedByUser={hasBeenSuggestedByUser}
             />
+            //  <ProposeMovieManager movieDetails={ movie as unknown as MovieDetails }/>
           )}
         </CardFooter>
       )}
