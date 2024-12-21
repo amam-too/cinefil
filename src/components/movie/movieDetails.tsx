@@ -1,9 +1,9 @@
 "use server";
 import CloseDetailsButton from "@/components/customButtons/closeDetailsButton";
 import SuggestButton from "@/components/customButtons/suggestButton";
-import MoviesCard from "@/components/movie/movieCard";
+import SuggestedMovies from "@/components/movie/movieSuggestions";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getMovieDetails, getSuggestions } from "@/server/services/tmdb";
+import { getMovieDetails } from "@/server/services/tmdb";
 import { getYearOnly } from "@/utils/date";
 import { Suspense } from "react";
 
@@ -82,24 +82,5 @@ export default async function MovieDetails({filmId}: { filmId: number }) {
                 </CardFooter>
             </div>
         </Card>
-    );
-}
-
-async function SuggestedMovies({filmId}: { filmId: number }) {
-    const suggestedMovies = await getSuggestions(filmId);
-    
-    if (!suggestedMovies?.results) {
-        return <div>Loading...</div>;
-    }
-    
-    return (
-        <div className="flex flex-col mt-4 overflow-auto">
-            <h1 className="text-xl">Films Similaires</h1>
-            <div className="flex flex-row justify-start gap-8">
-                { suggestedMovies.results.map((movie) => (
-                    <MoviesCard movie={ movie } hasBeenSuggested={ false } key={ movie.id }/>
-                )) }
-            </div>
-        </div>
     );
 }
