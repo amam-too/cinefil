@@ -2,7 +2,9 @@
 
 import { SearchParams } from "@/app/searchParams";
 import SuggestButton from "@/components/customButtons/suggestButton";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import VoteButton from "@/components/customButtons/voteButton";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { getSuggestions } from "@/server/services/tmdb";
 import { getHumanReadableDate, getYearOnly } from "@/utils/date";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
