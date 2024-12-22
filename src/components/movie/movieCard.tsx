@@ -2,6 +2,7 @@
 
 import { SearchParams } from "@/app/searchParams";
 import SuggestButton from "@/components/customButtons/suggestButton";
+import VoteButton from "@/components/customButtons/voteButton";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { getSuggestions } from "@/server/services/tmdb";
 import { getHumanReadableDate, getYearOnly } from "@/utils/date";
@@ -59,8 +60,7 @@ export default async function MoviesCard({movie, hasBeenSuggested, shown_at}: Mo
             <CardFooter className="p-4 pb-4">
                 { hasBeenSuggested || shown_at ? (
                     <>
-                        {/* TODO : Add Vote Button. */ }
-                        Vote
+                        <VoteButton movieId={ movie.id }/>
                     </>
                 ) : (
                     <SuggestButton movieDetails={ movie as unknown as MovieDetails }/>
