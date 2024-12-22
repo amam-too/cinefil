@@ -33,6 +33,7 @@ export async function voteForMovie(
   });
 
   if (error) {
+    console.error(error);
     throw new Error(
       "Une erreur est survenue, merci de réessayer ultérieurement. Le vote n'a pas été pris en compte.",
     );
@@ -40,7 +41,46 @@ export async function voteForMovie(
 
   return {
     success: true,
-    message: "A voté !",
+    message: `Vote successfully added for movie with TMDB ID: ${tmdb_id}`,
+  };
+}
+
+/**
+ * Remove a vote for a movie by its tmdb_id.
+ * @param {string} tmdb_id - The TMDB ID of the movie to remove the vote for.
+ * @returns {Promise<VoteForMovieResponse>} Response indicating the success or failure of the operation.
+ */
+export async function removeVoteForMovie(
+  tmdb_id: string,
+): Promise<VoteForMovieResponse> {
+  const supabase = createClient();
+
+  // Retrieve the current user's session.
+  const { data: session, error: sessionError } = await supabase.auth.getUser();
+
+  if (sessionError || !session?.user) {
+    throw new Error(
+      "Unable to retrieve the user's session. Please try reconnecting.",
+    );
+  }
+
+  // Attempt to delete the vote from the database.
+  const { error: deleteError } = await supabase
+    .from("votes")
+    .delete()
+    .eq("tmdb_id", tmdb_id)
+    .eq("user_id", session.user.id); // Ensure the vote belongs to the current user.
+
+  if (deleteError) {
+    console.error("Error deleting vote:", deleteError);
+    throw new Error(
+      "An error occurred while removing the vote. Please try again later.",
+    );
+  }
+
+  return {
+    success: true,
+    message: `Vote successfully removed for movie with TMDB ID: ${tmdb_id}`,
   };
 }
 
