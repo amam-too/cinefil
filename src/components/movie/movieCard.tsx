@@ -17,7 +17,7 @@ interface MovieCardProps {
   shown_at?: string
 }
 
-export default async function MoviesCard({
+export default function MoviesCard({
   movie,
   hasBeenSuggestedByUser,
   hasBeenSuggested,
