@@ -1,16 +1,26 @@
 "use client";
+
 import { SearchParams } from "@/app/searchParams";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/utils/supabase/client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { type MovieDetails } from "tmdb-ts";
+import LoadingWheel from "@/components/loadingWheel";
+import { useState } from "react";
+import { removeSuggestion, suggestMovie } from "@/server/services/suggestions";
 
 export default function SuggestButton({
   movieDetails,
+  hasBeenSuggestedByUser,
 }: {
   movieDetails: MovieDetails
+  hasBeenSuggestedByUser: boolean
 }) {
+  const [hasBeenSuggested, setHasBeenSuggested] = useState(
+    hasBeenSuggestedByUser,
+  );
+  const [loading, setLoading] = useState(false);
+
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -28,48 +38,48 @@ export default function SuggestButton({
   };
 
   /**
-   *
-   * @param movie
+   * Suggest or remove suggestion based on the current state.
    */
-  const createdSuggestion = async (movie: MovieDetails): Promise<void> => {
-    const { error } = await createClient().from("suggestions").insert({
-      tmdb_id: movie.id,
-      shown_at: null,
-      createdAt: new Date().toISOString(),
+  const handleSuggestion = async (): Promise<void> => {
+    setLoading(true);
+    const action = hasBeenSuggested ? removeSuggestion : suggestMovie;
+    const loadingMessage = hasBeenSuggested
+      ? "On retire ta suggestion..."
+      : "On enregistre ta suggestion...";
+    const successMessage = hasBeenSuggested
+      ? `${movieDetails.title} a été retiré des suggestions.`
+      : `${movieDetails.title} a été ajouté aux suggestions.`;
+
+    toast.promise(action(movieDetails.id.toString()), {
+      loading: loadingMessage,
+      success: (response) => {
+        setHasBeenSuggested(!hasBeenSuggested);
+        setLoading(false);
+        return response.message ?? successMessage;
+      },
+      error: (error: Error) => {
+        setLoading(false);
+        return (
+          error.message ??
+          "Une erreur est survenue, merci de réessayer ultérieurement."
+        );
+      },
+      action: {
+        label: "Voir les suggestions",
+        onClick: displaySuggestions,
+      },
     });
-
-    if (error) {
-      if (error.code.toString() === "23505") {
-        toast.warning(`${movie.title} est déjà ajouté aux suggestions.`, {
-          action: {
-            label: "Voir les suggestions",
-            onClick: displaySuggestions,
-          },
-        });
-        return;
-      }
-
-      toast.error("Impossible d'ajouter la suggestion !", {
-        description: `${movie.title} n'a pas pu être ajouté aux suggestions.`,
-      });
-    } else {
-      toast.success("Suggestion ajoutée !", {
-        description: `${movie.title} a été ajouté aux suggestions.`,
-        action: {
-          label: "Voir les suggestions",
-          onClick: displaySuggestions,
-        },
-      });
-    }
   };
 
   return (
-    <Button
-      variant="outline"
-      className="text-white"
-      onClick={() => createdSuggestion(movieDetails)}
-    >
-      Proposer le film
+    <Button variant="outline" className="text-white" onClick={handleSuggestion}>
+      {loading ? (
+        <LoadingWheel />
+      ) : hasBeenSuggested ? (
+        "Retirer la suggestion"
+      ) : (
+        "Suggérer le film"
+      )}
     </Button>
   );
 }
