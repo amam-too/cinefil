@@ -1,6 +1,7 @@
 "use client";
 
 import { SearchParams } from "@/app/searchParams";
+import VoteButton from "@/components/customButtons/voteButton";
 import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getHumanReadableDate, getYearOnly } from "@/utils/date";
@@ -58,8 +59,7 @@ export default async function MoviesCard({movie, hasBeenSuggested, shown_at}: Mo
             <CardFooter className="p-4 pb-4">
                 { hasBeenSuggested || shown_at ? (
                     <>
-                        {/* TODO : Add Vote Button. */ }
-                        Vote
+                        <VoteButton movieId={ movie.id }/>
                     </>
                 ) : (
                     <ProposeMovieManager movieDetails={ movie as unknown as MovieDetails }/>
