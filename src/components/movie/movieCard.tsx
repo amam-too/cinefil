@@ -3,14 +3,12 @@
 import { SearchParams } from "@/app/searchParams";
 import SuggestButton from "@/components/customButtons/suggestButton";
 import VoteButton from "@/components/customButtons/voteButton";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getSuggestions } from "@/server/services/tmdb";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getHumanReadableDate, getYearOnly } from "@/utils/date";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { type Movie, type MovieDetails } from "tmdb-ts";
 import { useDebouncedCallback } from "use-debounce";
-import VoteButton from "@/components/customButtons/voteButton";
 
 interface MovieCardProps {
   movie: Movie
