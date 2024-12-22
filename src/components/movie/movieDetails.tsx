@@ -9,14 +9,14 @@ import { Suspense } from "react";
 
 export default async function MovieDetails({filmId}: { filmId: number }) {
     const movieDetails = await getMovieDetails(filmId);
-    
+
     if (!movieDetails) {
         return <div>Loading...</div>;
     }
-    
+
     const backdropUrl: string = `https://image.tmdb.org/t/p/w1280${ movieDetails.backdrop_path }`;
     const posterUrl: string = `https://image.tmdb.org/t/p/w500${ movieDetails.poster_path }`;
-    
+
     return (
         <Card
             key={ movieDetails.id }
@@ -30,7 +30,7 @@ export default async function MovieDetails({filmId}: { filmId: number }) {
                     filter: "brightness(0.5) blur(10px)"
                 } }
             ></div>
-            
+
             {/* Poster Image Section */ }
             <div className="z-10 flex flex-row justify-between p-4">
                 <div className="relative flex h-full max-w-xs items-center justify-center">
@@ -43,7 +43,7 @@ export default async function MovieDetails({filmId}: { filmId: number }) {
                 </div>
                 <CloseDetailsButton/>
             </div>
-            
+
             {/* Card Content with Overlay Text */ }
             <div className="relative z-10 mt-4 flex flex-col justify-center text-left text-white">
                 <CardHeader className="mb-2">
@@ -69,7 +69,7 @@ export default async function MovieDetails({filmId}: { filmId: number }) {
                     <CardDescription className="mt-4 text-lg text-gray-200">
                         { movieDetails.overview }
                     </CardDescription>
-                    
+
                     {/* TODO : Add Cast and Crew */ }
                     {/* TODO : Add Genres */ }
                     {/* TODO : Add Similar Movies */ }
@@ -78,20 +78,24 @@ export default async function MovieDetails({filmId}: { filmId: number }) {
                     </Suspense>
                 </CardContent>
                 <CardFooter className="mt-4">
-                    <SuggestButton movieDetails={ movieDetails }/>
-                </CardFooter>
-            </div>
-        </Card>
-    );
+                    <SuggestButton
+            movieDetails={movieDetails}
+            // TODO : Implement true value fetching for hasBeenSuggestedByUser.
+            hasBeenSuggestedByUser={false}
+          />
+        </CardFooter>
+      </div>
+    </Card>
+  );
 }
 
 async function SuggestedMovies({filmId}: { filmId: number }) {
     const suggestedMovies = await getSuggestions(filmId);
-    
+
     if (!suggestedMovies?.results) {
         return <div>Loading...</div>;
     }
-    
+
     return (
         <div className="flex flex-col mt-4 overflow-auto">
             <h1 className="text-xl">Films Similaires</h1>

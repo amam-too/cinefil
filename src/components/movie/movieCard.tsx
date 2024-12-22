@@ -9,6 +9,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { type Movie, type MovieDetails } from "tmdb-ts";
 import { useDebouncedCallback } from "use-debounce";
+import VoteButton from "@/components/customButtons/voteButton";
 
 interface MovieCardProps {
   movie: Movie
@@ -57,6 +58,28 @@ export default async function MoviesCard({movie, hasBeenProposed, shown_at}: Mov
                     </div>
                 </CardContent>
             </div>
+
+          /*
+
+          {/* Case 1: The movie was shown => Allow nothing */}
+          {!shown_at && (
+            <CardFooter className="p-4 pb-4">
+              {hasBeenSuggested && !hasBeenSuggestedByUser ? (
+                /* Case 2: The movie was suggested by another user => Allow voting */
+                <VoteButton movieId={movie.id} />
+              ) : (
+                /* Case 3: The movie was suggested by the user => Allow removal */
+                /* Case 4: The movie was never suggested => Allow suggestion */
+                <SuggestButton
+                  movieDetails={movie as unknown as MovieDetails}
+                  hasBeenSuggestedByUser={hasBeenSuggestedByUser}
+                />
+              )}
+            </CardFooter>
+          )}
+        </Card>
+
+      */
             <CardFooter className="p-4 pb-4">
               <DeleteSuggestionButton
                 movieDetails={movie as unknown as MovieDetails}
