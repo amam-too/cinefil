@@ -3,4 +3,5 @@ export interface Suggestion {
   tmdb_id: number
   shown_at: string | null
   createdAt: string
+  user_id: string
 }
