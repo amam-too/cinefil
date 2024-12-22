@@ -2,10 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { getMovieDetails } from "@/server/services/tmdb";
+import { type Suggestion } from "@/types/suggestion";
 import { getYearOnly } from "@/utils/date";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { MovieDetails } from "tmdb-ts";
+import { type MovieDetails } from "tmdb-ts";
 import { getCurrentPropositions } from "@/server/services/propositions";
 
 interface ToDiscardMoviesProps {
@@ -19,17 +20,17 @@ export function ToDiscardMovies({ handleChoice }: ToDiscardMoviesProps) {
     useEffect(() => {
         const fetchMovies = async () => {
             try {
-                const propositions = await getCurrentPropositions();
-                const movieDetails = await Promise.all(propositions.map((movie) => getMovieDetails(movie.tmdb_id)));
+                const propositions: Suggestion[] = await getCurrentPropositions();
+                const movieDetails = await Promise.all(propositions.map((movie: Suggestion) => getMovieDetails(movie.tmdb_id)));
                 setMovies(movieDetails);
-            } catch (error) {
-                toast.error("Failed to fetch movie details.");
+            } catch {
+                toast.error("Une erreur est survenue lors de la récupération des propositions.");
             } finally {
                 setLoading(false);
             }
         };
         
-        fetchMovies();
+        void fetchMovies();
     }, []);
     
     if (loading) {
@@ -39,6 +40,7 @@ export function ToDiscardMovies({ handleChoice }: ToDiscardMoviesProps) {
     return movies.map((movie, index) => (
         <div key={index} className="flex flex-col items-center justify-between gap-4 w-full max-w-[200px]">
             <div className="flex flex-col h-full w-full gap-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */ }
                 <img
                     src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                     alt={movie.title}

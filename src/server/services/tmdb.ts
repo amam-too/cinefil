@@ -7,8 +7,8 @@ const LOCALE = "fr-FR";
 
 const tmdb = new TMDB(process.env.TMDB_API_TOKEN!);
 const rateLimiter = new RateLimiterMemory({
-  points: 15,
-  duration: 60,
+    points: 30,
+    duration: 60
 });
 
 const handleRateLimit = async (key: string | number) => {
