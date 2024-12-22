@@ -1,10 +1,9 @@
 "use client";
 
 import { SearchParams } from "@/app/searchParams";
-import SuggestButton from "@/components/customButtons/suggestButton";
 import VoteButton from "@/components/customButtons/voteButton";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getSuggestions } from "@/server/services/tmdb";
+import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getHumanReadableDate, getYearOnly } from "@/utils/date";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
@@ -17,7 +16,7 @@ interface MovieCardProps {
     shown_at?: string;
 }
 
-export default async function MoviesCard({movie, hasBeenSuggested, shown_at}: MovieCardProps) {
+export default function MoviesCard({movie, hasBeenSuggested, shown_at}: MovieCardProps) {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
@@ -63,7 +62,7 @@ export default async function MoviesCard({movie, hasBeenSuggested, shown_at}: Mo
                         <VoteButton movieId={ movie.id }/>
                     </>
                 ) : (
-                    <SuggestButton movieDetails={ movie as unknown as MovieDetails }/>
+                    <ProposeMovieManager movieDetails={ movie as unknown as MovieDetails }/>
                 ) }
             </CardFooter>
         </Card>
