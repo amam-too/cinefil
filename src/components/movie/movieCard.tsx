@@ -8,16 +8,18 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { type Movie, type MovieDetails } from "tmdb-ts";
 import { useDebouncedCallback } from "use-debounce";
-import DeleteSuggestionButton from "@/components/customButtons/deleteSuggestionButton";
+import VoteButton from "@/components/customButtons/voteButton";
 
 interface MovieCardProps {
   movie: Movie
+  hasBeenSuggestedByUser: boolean
   hasBeenSuggested: boolean
   shown_at?: string
 }
 
 export default async function MoviesCard({
   movie,
+  hasBeenSuggestedByUser,
   hasBeenSuggested,
   shown_at,
 }: MovieCardProps) {
@@ -56,26 +58,30 @@ export default async function MoviesCard({
             <p className="text-start text-sm text-gray-500">
               {getYearOnly(movie.release_date)}
             </p>
-            {shown_at ? (
+            {shown_at && (
               <p className="pt-8 text-start text-sm font-bold text-red-500">
                 Diffusé {getHumanReadableDate(shown_at)}
               </p>
-            ) : null}
+            )}
           </div>
         </CardContent>
       </div>
-      <CardFooter className="p-4 pb-4">
-        {hasBeenSuggested || shown_at ? (
-          <div className="flex flex-col space-y-4">
-            {/* TODO : Add Vote Button. */}
-            <DeleteSuggestionButton
+      {/* Case 1: The movie was shown => Allow nothing */}
+      {!shown_at && (
+        <CardFooter className="p-4 pb-4">
+          {hasBeenSuggested && !hasBeenSuggestedByUser ? (
+            /* Case 2: The movie was suggested by another user => Allow voting */
+            <VoteButton movieId={movie.id} />
+          ) : (
+            /* Case 3: The movie was suggested by the user => Allow removal */
+            /* Case 4: The movie was never suggested => Allow suggestion */
+            <SuggestButton
               movieDetails={movie as unknown as MovieDetails}
+              hasBeenSuggestedByUser={hasBeenSuggestedByUser}
             />
-          </div>
-        ) : (
-          <SuggestButton movieDetails={movie as unknown as MovieDetails} />
-        )}
-      </CardFooter>
+          )}
+        </CardFooter>
+      )}
     </Card>
   );
 }

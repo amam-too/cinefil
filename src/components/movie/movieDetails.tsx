@@ -87,7 +87,11 @@ export default async function MovieDetails({ filmId }: { filmId: number }) {
           </Suspense>
         </CardContent>
         <CardFooter className="mt-4">
-          <SuggestButton movieDetails={movieDetails} />
+          <SuggestButton
+            movieDetails={movieDetails}
+            // TODO : Implement true value fetching for hasBeenSuggestedByUser.
+            hasBeenSuggestedByUser={false}
+          />
         </CardFooter>
       </div>
     </Card>

@@ -13,7 +13,8 @@ export async function getSuggestions(): Promise<Suggestion[]> {
 
   const { data: suggestions, error: suggestionsError } = await supabase
     .from("suggestions")
-    .select("*");
+    .select("*")
+    .order("shown_at", { ascending: false }); // Sort by shown_at in descending order.
 
   if (suggestionsError) {
     console.error("Error fetching suggestions:", suggestionsError);

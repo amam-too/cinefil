@@ -1,9 +1,9 @@
 import MoviesGrid from "@/components/movie/moviesGrid";
 import { getMovieDetails } from "@/server/services/tmdb";
 import { type Suggestion } from "@/types/suggestion";
-import { createClient } from "@/utils/supabase/server";
 import React, { Suspense } from "react";
 import { type Movie } from "tmdb-ts";
+import { getSuggestions } from "@/server/services/suggestions";
 
 export default async function Suggestions({
   displayShown,
@@ -22,26 +22,6 @@ export default async function Suggestions({
     return await Promise.all(moviePromises);
   };
 
-  /**
-   *
-   */
-  const fetchSuggestions = async () => {
-    const { data, error } = await createClient()
-      .from("suggestions")
-      .select()
-      .order("shown_at", { ascending: false }); // Sort by shown_at in descending order.
-
-    if (error) {
-      console.error("Error fetching suggestions:", error);
-      // TODO : Add error handling.
-      return <>{error.code}</>;
-    }
-
-    if (data && data.length > 0) {
-      return fetchMoviesDetails(data as Suggestion[]);
-    }
-  };
-
   return (
     <div className="flex flex-col">
       <h1 className="ml-8 mt-4 text-center text-2xl font-bold">
@@ -49,8 +29,11 @@ export default async function Suggestions({
       </h1>
       <Suspense>
         <MoviesGrid
-          movies={(await fetchSuggestions()) as unknown[] as Movie[]}
-          forSuggestions={true}
+          movies={
+            (await fetchMoviesDetails(
+              await getSuggestions(),
+            )) as unknown[] as Movie[]
+          }
           displayShown={displayShown}
         />
       </Suspense>

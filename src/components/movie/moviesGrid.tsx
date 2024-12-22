@@ -3,19 +3,22 @@ import MoviesCard from "@/components/movie/movieCard";
 import { createClient } from "@/utils/supabase/server";
 import { Suspense } from "react";
 import { type Movie } from "tmdb-ts";
+import type { Suggestion } from "@/types/suggestion";
+import {
+  getSuggestions,
+  getUserSuggestions,
+} from "@/server/services/suggestions";
 
 interface MovieGridProps {
   movies: Movie[]
   filmId?: number
   displayShown?: string | undefined
-  forSuggestions: boolean
 }
 
 export default async function MoviesGrid({
   movies,
   filmId,
   displayShown,
-  forSuggestions,
 }: MovieGridProps) {
   /**
    * Fetch all movies that have been shown.
@@ -37,9 +40,18 @@ export default async function MoviesGrid({
     return data;
   };
 
-  const moviesId: { tmdb_id: number; shown_at: string }[] =
-    await fetchShownMovies();
-  const displayShownBoolValue: boolean = displayShown === "true" || false;
+  // Fetch data.
+  const shownMovies = await fetchShownMovies();
+  const suggestions: Suggestion[] = await getSuggestions();
+  const userSuggestions: Suggestion[] = await getUserSuggestions(suggestions);
+
+  // Convert displayShown to a boolean.
+  const displayShownBool: boolean = displayShown === "true";
+
+  // Map TMDB IDs of shown movies for quick lookup.
+  const shownMoviesMap = new Map(
+    shownMovies.map((movie) => [movie.tmdb_id, movie.shown_at]),
+  );
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -51,28 +63,37 @@ export default async function MoviesGrid({
         }`}
       >
         {movies?.length > 0 ? (
-          movies.map((movie: Movie) =>
-            // If the movie has been shown and displayShown is false, hide the movie (return null).
-            !displayShownBoolValue &&
-            moviesId.some(
-              (value: { tmdb_id: number; shown_at: string }) =>
-                value.tmdb_id === movie.id,
-            ) ? null : (
-                <MoviesCard
-                  key={movie.id}
-                  movie={movie}
-                  hasBeenSuggested={forSuggestions}
-                  shown_at={
-                    moviesId.find(
-                      (value: { tmdb_id: number; shown_at: string }) =>
-                        value.tmdb_id === movie.id,
-                    )?.shown_at
-                  }
-                />
-              ),
-          )
+          movies.map((movie: Movie) => {
+            const shownAt = shownMoviesMap.get(movie.id);
+
+            // If the movie has been shown and displayShown is false, skip rendering.
+            if (!displayShownBool && shownAt) return null;
+
+            const hasBeenSuggestedByUser: boolean = userSuggestions.some(
+              (suggestedMovie: Suggestion): boolean => {
+                return suggestedMovie.tmdb_id === movie.id;
+              },
+            );
+
+            const hasBeenSuggested: boolean = suggestions.some(
+              (suggestedMovie: Suggestion): boolean => {
+                return suggestedMovie.tmdb_id === movie.id;
+              },
+            );
+            return (
+              <MoviesCard
+                key={movie.id}
+                movie={movie}
+                hasBeenSuggestedByUser={hasBeenSuggestedByUser}
+                hasBeenSuggested={hasBeenSuggested}
+                shown_at={shownAt}
+              />
+            );
+          })
         ) : (
-          <> {/* TODO : Implement fallback. */} </>
+          <div className="text-center text-gray-500">
+            No movies available to display.
+          </div>
         )}
       </div>
     </Suspense>
