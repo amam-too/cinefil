@@ -1,4 +1,4 @@
-import { ToDiscardMovies } from "@/components/propositions/proposedMovies";
+import { ToDiscardMovies } from "@/components/propositions/toDiscardMovies";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import React from "react";
