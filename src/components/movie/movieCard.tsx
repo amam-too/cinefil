@@ -17,7 +17,7 @@ interface MovieCardProps {
   shown_at?: string
 }
 
-export default async function MoviesCard({movie, hasBeenSuggested, shown_at}: MovieCardProps) {
+export default async function MoviesCard({movie, hasBeenProposed, shown_at}: MovieCardProps) {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();

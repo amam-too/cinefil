@@ -27,7 +27,7 @@ export default async function HomePage({
                             movies={ (await searchMovies(query)).results }
                             filmId={ Number(filmId) }
                             displayShown={ displayShown }
-                            forSuggestions={ false }
+                            forProposition={ false }
                         />
                     </Suspense>
                 ) }
