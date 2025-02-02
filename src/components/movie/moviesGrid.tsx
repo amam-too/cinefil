@@ -8,10 +8,10 @@ interface MovieGridProps {
     movies: Movie[];
     filmId?: number;
     displayShown?: string | undefined;
-    forSuggestions: boolean;
+    forProposition: boolean;
 }
 
-export default async function MoviesGrid({movies, filmId, displayShown, forSuggestions}: MovieGridProps) {
+export default async function MoviesGrid({movies, filmId, displayShown, forProposition}: MovieGridProps) {
     /**
      * Fetch all movies that have been shown.
      */
@@ -56,7 +56,7 @@ export default async function MoviesGrid({movies, filmId, displayShown, forSugge
                             <MoviesCard
                                 key={ movie.id }
                                 movie={ movie }
-                                hasBeenSuggested={ forSuggestions }
+                                hasBeenProposed={ forProposition }
                                 shown_at={
                                     moviesId.find(
                                         (value: { tmdb_id: number; shown_at: string }) =>

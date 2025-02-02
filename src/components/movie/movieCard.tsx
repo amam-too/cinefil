@@ -12,11 +12,11 @@ import { useDebouncedCallback } from "use-debounce";
 
 interface MovieCardProps {
     movie: Movie;
-    hasBeenSuggested: boolean;
+    hasBeenProposed: boolean;
     shown_at?: string;
 }
 
-export default function MoviesCard({movie, hasBeenSuggested, shown_at}: MovieCardProps) {
+export default function MoviesCard({movie, hasBeenProposed, shown_at}: MovieCardProps) {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
@@ -57,7 +57,7 @@ export default function MoviesCard({movie, hasBeenSuggested, shown_at}: MovieCar
                 </CardContent>
             </div>
             <CardFooter className="p-4 pb-4">
-                { hasBeenSuggested || shown_at ? (
+                { hasBeenProposed || shown_at ? (
                     <>
                         <VoteButton movieId={ movie.id }/>
                     </>
