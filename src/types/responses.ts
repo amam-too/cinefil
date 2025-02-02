@@ -1,4 +1,4 @@
-import { type Suggestion } from "@/types/suggestion";
+import { type Proposition } from "@/types/proposition";
 
 export type VoteForMovieResponse = {
     success: boolean;
@@ -11,5 +11,5 @@ export type ProposeAMovieResponse = {
 } | {
     success: false;
     message: string;
-    propositions: Suggestion[]
+    propositions: Proposition[]
 }

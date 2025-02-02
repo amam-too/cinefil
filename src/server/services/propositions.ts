@@ -1,7 +1,7 @@
 "use server"
 
 import { type ProposeAMovieResponse } from "@/types/responses";
-import { type Suggestion } from "@/types/suggestion";
+import { type Proposition } from "@/types/proposition";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -73,7 +73,7 @@ export async function removeProposition(tmdb_id: number): Promise<ProposeAMovieR
 /**
  * Returns the number of propositions for the current user.
  */
-export async function getCurrentPropositions(): Promise<Suggestion[]> {
+export async function getCurrentPropositions(): Promise<Proposition[]> {
     const supabase = createClient()
     
     const {data: userData, error: userError} = await supabase.auth.getUser();
@@ -94,5 +94,5 @@ export async function getCurrentPropositions(): Promise<Suggestion[]> {
         throw new Error(`Une erreur est survenue, merci de réessayer ultérieurement. ${propositionsError?.message}`);
     }
     
-    return propositions as Suggestion[];
+    return propositions as Proposition[];
 }

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { getMovieDetails } from "@/server/services/tmdb";
-import { type Suggestion } from "@/types/suggestion";
+import { type Proposition } from "@/types/proposition";
 import { getYearOnly } from "@/utils/date";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -20,8 +20,8 @@ export function ToDiscardMovies({ handleChoice }: ToDiscardMoviesProps) {
     useEffect(() => {
         const fetchMovies = async () => {
             try {
-                const propositions: Suggestion[] = await getCurrentPropositions();
-                const movieDetails = await Promise.all(propositions.map((movie: Suggestion) => getMovieDetails(movie.tmdb_id)));
+                const propositions: Proposition[] = await getCurrentPropositions();
+                const movieDetails = await Promise.all(propositions.map((movie: Proposition) => getMovieDetails(movie.tmdb_id)));
                 setMovies(movieDetails);
             } catch {
                 toast.error("Une erreur est survenue lors de la récupération des propositions.");
