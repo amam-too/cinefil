@@ -1,13 +1,13 @@
 import MoviesGrid from "@/components/movie/moviesGrid";
 import { getMovieDetails } from "@/server/services/tmdb";
-import { type Suggestion } from "@/types/suggestion";
+import { type Proposition } from "@/types/proposition";
 import { createClient } from "@/utils/supabase/server";
 import React, { Suspense } from "react";
 import { type Movie } from "tmdb-ts";
 import { getSuggestions } from "@/server/services/suggestions";
 
 export default async function Propositions({displayShown}: { displayShown?: string }) {
-    const fetchMoviesDetails = (suggestions: Suggestion[]) => {
+    const fetchMoviesDetails = (suggestions: Proposition[]) => {
         const moviePromises = suggestions.map(suggestion => getMovieDetails(suggestion.tmdb_id));
         return Promise.all(moviePromises);
     };
@@ -18,7 +18,7 @@ export default async function Propositions({displayShown}: { displayShown?: stri
             console.error("Error fetching suggestions:", error);
             return [];
         }
-        return data && data.length > 0 ? fetchMoviesDetails(data as Suggestion[]) : [];
+        return data && data.length > 0 ? fetchMoviesDetails(data as Proposition[]) : [];
     };
     
     return (

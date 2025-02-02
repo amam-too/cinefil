@@ -1,4 +1,4 @@
-import { type Suggestion } from "@/types/suggestion";
+import { type Proposition } from "@/types/proposition";
 
 export type VoteForMovieResponse = {
   success: boolean
