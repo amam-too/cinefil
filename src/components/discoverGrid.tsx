@@ -13,7 +13,7 @@ export async function DiscoverGrid() {
         <div className="flex flex-col">
             <h1 className="text-2xl font-bold mt-4 ml-8">Gallerie de films</h1>
             <Suspense fallback={ <p>Loading...</p> }>
-            <MoviesGrid movies={ discoverMovies.results } forSuggestions={ true }/>
+            <MoviesGrid movies={ discoverMovies.results } forProposition={ true }/>
             </Suspense>
         </div>
     )

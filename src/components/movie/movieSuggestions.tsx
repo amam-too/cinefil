@@ -13,7 +13,7 @@ export default async function SuggestedMovies({filmId}: { filmId: number }) {
             <h1 className="text-xl">Films Similaires</h1>
             <div className="flex flex-row justify-start gap-8">
                 { suggestedMovies.results.map((movie) => (
-                    <MoviesCard movie={ movie } hasBeenSuggested={ false } key={ movie.id }/>
+                    <MoviesCard movie={ movie } hasBeenProposed={ false } key={ movie.id }/>
                 )) }
             </div>
         </div>
