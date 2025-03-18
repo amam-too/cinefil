@@ -2,6 +2,7 @@ import MoviesCard from "@/components/movie/movieCard";
 import { getSuggestions } from "@/server/services/tmdb";
 import { type Vote } from "@/types/vote";
 import { fetchProposedMoviesIds } from "@/server/services/propositions";
+import { getAllVotes } from "@/server/services/votes";
 
 interface SuggestedMoviesProps {
   filmId: number;
@@ -9,7 +10,7 @@ interface SuggestedMoviesProps {
 }
 
 /**
- * Suggestion de films similaires au film correspondant à l'id passé en paramètre.
+ * Suggestion de films similaires au film correspondant à l'ID passé en paramètre.
  *
  * @param filmId
  * @param votedMovies
@@ -19,13 +20,22 @@ export default async function SuggestedMovies({
   filmId,
   votedMovies,
 }: SuggestedMoviesProps) {
-  const suggestedMovies = await getSuggestions(filmId);
-
-  const moviesId: { tmdb_id: number }[] = await fetchProposedMoviesIds();
+  // Fetch all required data in parallel for better performance.
+  const [suggestedMovies, proposedMoviesIds, allVotes] = await Promise.all([
+    getSuggestions(filmId),
+    fetchProposedMoviesIds(),
+    getAllVotes(),
+  ]);
 
   if (!suggestedMovies?.results) {
     return <div>Loading...</div>;
   }
+
+  // Convert votes to a Map for faster lookup.
+  const voteCountMap = new Map<number, number>();
+  allVotes.forEach((vote) => {
+    voteCountMap.set(vote.tmdb_id, (voteCountMap.get(vote.tmdb_id) ?? 0) + 1);
+  });
 
   return (
     <div className="mt-4 flex flex-col overflow-auto">
@@ -33,16 +43,13 @@ export default async function SuggestedMovies({
       <div className="flex flex-row justify-start gap-8">
         {suggestedMovies.results.map((movie) => (
           <MoviesCard
+            key={movie.id}
             movie={movie}
             filmCanBeProposed={
-              !moviesId?.find(
-                (value: { tmdb_id: number }) => value.tmdb_id === movie.id,
-              )
+              !proposedMoviesIds.some((p) => p.tmdb_id === movie.id)
             }
-            key={movie.id}
-            hasVoted={
-              !!votedMovies?.find((value: Vote) => value.tmdb_id === movie.id)
-            }
+            userHasVotedFor={votedMovies.some((v) => v.tmdb_id === movie.id)}
+            numberOfVoteForFilm={voteCountMap.get(movie.id) ?? 0}
           />
         ))}
       </div>

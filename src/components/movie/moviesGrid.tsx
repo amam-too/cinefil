@@ -7,6 +7,7 @@ import {
   fetchProposedMoviesIds,
   fetchShownMoviesIds,
 } from "@/server/services/propositions";
+import { getAllVotes } from "@/server/services/votes";
 
 interface MovieGridProps {
   movies: Movie[];
@@ -27,6 +28,11 @@ export default async function MoviesGrid({
     await fetchShownMoviesIds();
 
   const displayShownBoolValue: boolean = displayShown === "true" || false;
+
+  const voteCountMap = new Map<number, number>();
+  (await getAllVotes()).forEach((vote) => {
+    voteCountMap.set(vote.tmdb_id, (voteCountMap.get(vote.tmdb_id) ?? 0) + 1);
+  });
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -59,11 +65,12 @@ export default async function MoviesGrid({
                       value.tmdb_id === movie.id,
                   )?.shown_at
                 }
-                hasVoted={
+                userHasVotedFor={
                   !!votedMovies?.find(
                     (value: Vote) => value.tmdb_id === movie.id,
                   )
                 }
+                numberOfVoteForFilm={voteCountMap.get(movie.id) ?? 0}
               />
             ),
           )

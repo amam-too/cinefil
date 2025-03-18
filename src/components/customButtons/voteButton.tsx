@@ -3,18 +3,24 @@
 import LoadingWheel from "@/components/loadingWheel";
 import { Button } from "@/components/ui/button";
 import { deleteVoteForMovie, voteForMovie } from "@/server/services/votes";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { toast } from "sonner";
+
+interface VoteButtonProps {
+  movieId: number;
+  initial: boolean;
+  numberOfVoteForFilm: number;
+}
 
 export default function VoteButton({
   movieId,
   initial,
-}: {
-  movieId: number;
-  initial: boolean;
-}) {
+  numberOfVoteForFilm,
+}: VoteButtonProps) {
   const [hasVoted, setHasVoted] = useState(initial);
   const [loading, setLoading] = useState(false);
+  const [displayedNumberOfVotes, setDisplayedNumberOfVotes] =
+    useState(numberOfVoteForFilm);
 
   const handleVote = useCallback(async () => {
     setLoading(true);
@@ -31,6 +37,7 @@ export default function VoteButton({
       loading: loadingMessage,
       success: (response) => {
         setHasVoted(!hasVoted);
+        setDisplayedNumberOfVotes((prev) => prev + (hasVoted ? -1 : 1));
         setLoading(false);
         return response.message ?? successMessage;
       },
@@ -46,7 +53,11 @@ export default function VoteButton({
 
   return (
     <Button onClick={handleVote} disabled={loading}>
-      {loading ? <LoadingWheel /> : hasVoted ? "Supprimer le vote" : "Voter"}
+      {loading ? (
+        <LoadingWheel />
+      ) : (
+        `${displayedNumberOfVotes} ${hasVoted ? "Supprimer le vote" : "Voter"}`
+      )}
     </Button>
   );
 }

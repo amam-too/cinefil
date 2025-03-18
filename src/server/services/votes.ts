@@ -75,7 +75,7 @@ export async function deleteVoteForMovie(tmdb_id: string): Promise<VoteForMovieR
 /**
  *
  */
-export async function getMoviesVoted(): Promise<Vote[]> {
+export async function getMoviesVotedByUser(): Promise<Vote[]> {
     const supabase = createClient()
 
     const {data: session, error: sessionError} = await supabase.auth.getUser();
@@ -96,6 +96,25 @@ export async function getMoviesVoted(): Promise<Vote[]> {
 
     return votes as Vote[]
 }
+
+/**
+ *
+ */
+export async function getAllVotes(): Promise<Vote[]> {
+    const supabase = createClient();
+
+    const {data: votes, error: votesError} = await supabase
+        .from("votes")
+        .select("*")
+
+    if (votesError) {
+        console.error("Error fetching votes :", votesError);
+        throw new Error("Une erreur est survenue lors de la récupération des votes.");
+    }
+
+    return votes as Vote[]
+}
+
 
 /**
  * Returns the number of votes for the current user.
