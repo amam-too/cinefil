@@ -1,7 +1,8 @@
-"use server"
+"use server";
 
-import { type VoteForMovieResponse } from "@/types/responses";
-import { createClient } from "@/utils/supabase/server";
+import {type VoteForMovieResponse} from "@/types/responses";
+import {createClient} from "@/utils/supabase/server";
+import {type Vote} from "@/types/vote";
 
 /**
  * Votes for one movie.
@@ -10,51 +11,90 @@ import { createClient } from "@/utils/supabase/server";
  */
 export async function voteForMovie(tmdb_id: string): Promise<VoteForMovieResponse> {
     const supabase = createClient()
-    
+
     const {data: session, error: sessionError} = await supabase.auth.getUser();
-    
+
     if (sessionError || !session) {
         throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
     }
-    
+
     const numberOfVotes = await getNumberOfVotesForCurrentUser(session.user.id);
-    
+
     if (numberOfVotes >= 3) {
         throw new Error("Tu as déjà voté pour 3 films. Tu ne peux plus voter.");
     }
-    
+
     const { error } = await supabase
       .from("votes")
       .insert({
         tmdb_id: tmdb_id,
         user_id: session.user.id
       });
-    
+
     if (error) {
         throw new Error("Une erreur est survenue, merci de réessayer ultérieurement. Le vote n'a pas été pris en compte.");
     }
-    
+
     return {
         success: true,
         message: "A voté !"
     }
 }
 
-export async function hasVotedForMovie(tmdb_id: string, user_id: string): Promise<boolean> {
+
+/**
+ * Delete vote for one movie.
+ *
+ * @param tmdb_id
+ */
+export async function deleteVoteForMovie(tmdb_id: string): Promise<VoteForMovieResponse> {
     const supabase = createClient()
-    
+
+    const {data: session, error: sessionError} = await supabase.auth.getUser();
+
+    if (sessionError || !session) {
+        throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
+    }
+
+    const { error } = await supabase
+        .from("votes")
+        .delete()
+        .eq("tmdb_id", tmdb_id)
+        .eq("user_id", session.user.id);
+
+    if (error) {
+        throw new Error("Une erreur est survenue, merci de réessayer ultérieurement. La suppression du vote n'a pas été pris en compte.");
+    }
+
+    return {
+        success: true,
+        message: "Vote supprimé avec succès."
+    }
+}
+
+/**
+ *
+ */
+export async function getMoviesVoted(): Promise<Vote[]> {
+    const supabase = createClient()
+
+    const {data: session, error: sessionError} = await supabase.auth.getUser();
+
+    if (sessionError || !session) {
+        throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
+    }
+
     const {data: votes, error: votesError} = await supabase
       .from("votes")
       .select("*")
-      .eq("tmdb_id", tmdb_id)
-      .eq("user_id", user_id);
-    
+      .eq("user_id", session.user.id);
+
     if (votesError) {
         console.error(votesError)
-        return false
+        return []
     }
-    
-    return votes && votes.length > 0
+
+    return votes as Vote[]
 }
 
 /**
@@ -63,16 +103,16 @@ export async function hasVotedForMovie(tmdb_id: string, user_id: string): Promis
  */
 async function getNumberOfVotesForCurrentUser(user_id: string): Promise<number> {
     const supabase = createClient()
-    
+
     const {data: votes, error: votesError} = await supabase
       .from("votes")
       .select("*")
       .eq("user_id", user_id);
-    
+
     if (votesError) {
         console.error(votesError)
         return 0
     }
-    
+
     return votes ? votes.length : 0
 }

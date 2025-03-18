@@ -2,31 +2,51 @@
 
 import LoadingWheel from "@/components/loadingWheel";
 import { Button } from "@/components/ui/button";
-import { voteForMovie } from "@/server/services/votes";
-import { useState } from "react";
+import { deleteVoteForMovie, voteForMovie } from "@/server/services/votes";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
-export default function VoteButton({movieId}: { movieId: number }) {
-    const [hasVoted, setHasVoted] = useState(false);
-    const [loading, setLoading] = useState(false);
-    
-    return !hasVoted ? (
-        <Button onClick={ async () => {
-            setLoading(true);
-            toast.promise(voteForMovie(movieId.toString()), {
-                loading: "On enregistre ton vote...",
-                success: (response) => {
-                    setHasVoted(true);
-                    setLoading(false);
-                    return response.message ?? "A voté !";
-                },
-                error: (error: Error) => {
-                    setLoading(false);
-                    return error.message ?? "Une erreur est survenue, merci de réessayer ultérieurement.";
-                }
-            });
-        } }>
-            { loading ? <LoadingWheel/> : "Voter" }
-        </Button>
-    ) : null
+export default function VoteButton({
+  movieId,
+  initial,
+}: {
+  movieId: number;
+  initial: boolean;
+}) {
+  const [hasVoted, setHasVoted] = useState(initial);
+  const [loading, setLoading] = useState(false);
+
+  const handleVote = useCallback(async () => {
+    setLoading(true);
+
+    const action = hasVoted ? deleteVoteForMovie : voteForMovie;
+
+    const loadingMessage = hasVoted
+      ? "On supprime ton vote..."
+      : "On enregistre ton vote...";
+
+    const successMessage = hasVoted ? "Vote supprimé !" : "A voté !";
+
+    toast.promise(action(movieId.toString()), {
+      loading: loadingMessage,
+      success: (response) => {
+        setHasVoted(!hasVoted);
+        setLoading(false);
+        return response.message ?? successMessage;
+      },
+      error: (error: Error) => {
+        setLoading(false);
+        return (
+          error.message ??
+          "Une erreur est survenue, merci de réessayer ultérieurement."
+        );
+      },
+    });
+  }, [hasVoted, movieId]);
+
+  return (
+    <Button onClick={handleVote} disabled={loading}>
+      {loading ? <LoadingWheel /> : hasVoted ? "Supprimer le vote" : "Voter"}
+    </Button>
+  );
 }
