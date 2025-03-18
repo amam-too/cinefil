@@ -64,6 +64,7 @@ export async function removeProposition(tmdb_id: number): Promise<ProposeAMovieR
     }
     
     revalidatePath("/");
+    
     return {
         success: true,
         message: "Ta proposition a été retirée."

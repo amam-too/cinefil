@@ -1,7 +1,7 @@
 import MoviesGrid from "@/components/movie/moviesGrid";
 import { getDiscoverMovies } from "@/server/services/tmdb";
 import React, { Suspense } from "react";
-import { getMoviesVoted } from "@/server/services/votes";
+import { getMoviesVotedByUser } from "@/server/services/votes";
 
 export async function DiscoverGrid() {
   const discoverMovies = await getDiscoverMovies();
@@ -16,7 +16,7 @@ export async function DiscoverGrid() {
       <Suspense fallback={<p>Loading...</p>}>
         <MoviesGrid
           movies={discoverMovies.results}
-          votedMovies={await getMoviesVoted()}
+          votedMovies={await getMoviesVotedByUser()}
         />
       </Suspense>
     </div>

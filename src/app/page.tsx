@@ -5,7 +5,7 @@ import SearchConfig from "@/components/searchConfig";
 import Propositions from "@/components/propositions/propositions";
 import { searchMovies } from "@/server/services/tmdb";
 import { Suspense } from "react";
-import { getMoviesVoted } from "@/server/services/votes";
+import { getMoviesVotedByUser } from "@/server/services/votes";
 import { type Vote } from "@/types/vote";
 
 export default async function HomePage({
@@ -17,7 +17,7 @@ export default async function HomePage({
   const filmId: string | undefined = searchParams?.filmId;
   const displayShown: string | undefined = searchParams?.displayShown;
 
-  const votedMovies: Vote[] = await getMoviesVoted();
+  const votedMovies: Vote[] = await getMoviesVotedByUser();
 
   return (
     <main className="flex flex-col justify-center p-4 text-white">

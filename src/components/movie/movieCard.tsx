@@ -14,14 +14,16 @@ interface MovieCardProps {
   movie: Movie;
   filmCanBeProposed: boolean;
   shown_at?: string;
-  hasVoted: boolean;
+  userHasVotedFor: boolean;
+  numberOfVoteForFilm: number;
 }
 
 export default function MoviesCard({
   movie,
   filmCanBeProposed,
   shown_at,
-  hasVoted,
+  userHasVotedFor,
+  numberOfVoteForFilm,
 }: MovieCardProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -73,7 +75,11 @@ export default function MoviesCard({
               movieDetails={movie as unknown as MovieDetails}
             />
           ) : (
-            <VoteButton movieId={movie.id} initial={hasVoted} />
+            <VoteButton
+              movieId={movie.id}
+              initial={userHasVotedFor}
+              numberOfVoteForFilm={numberOfVoteForFilm}
+            />
           )}
         </CardFooter>
       )}

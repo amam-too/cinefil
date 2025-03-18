@@ -4,7 +4,7 @@ import { type Proposition } from "@/types/proposition";
 import { createClient } from "@/utils/supabase/server";
 import React, { Suspense } from "react";
 import { type Movie } from "tmdb-ts";
-import { getMoviesVoted } from "@/server/services/votes";
+import { getMoviesVotedByUser } from "@/server/services/votes";
 
 export default async function Propositions({
   displayShown,
@@ -39,7 +39,7 @@ export default async function Propositions({
         <MoviesGrid
           movies={(await fetchPropositions()) as unknown as Movie[]}
           displayShown={displayShown}
-          votedMovies={await getMoviesVoted()}
+          votedMovies={await getMoviesVotedByUser()}
         />
       </Suspense>
     </div>
