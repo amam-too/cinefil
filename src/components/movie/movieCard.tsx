@@ -66,17 +66,17 @@ export default function MoviesCard({
           </div>
         </CardContent>
       </div>
-      <CardFooter className="p-4 pb-4">
-        {hasBeenProposed || shown_at ? (
-          <>
+      {!shown_at && (
+        <CardFooter className="p-4 pb-4">
+          {hasBeenProposed ? (
             <VoteButton movieId={movie.id} initial={hasVoted} />
-          </>
-        ) : (
-          <ProposeMovieManager
-            movieDetails={movie as unknown as MovieDetails}
-          />
-        )}
-      </CardFooter>
+          ) : (
+            <ProposeMovieManager
+              movieDetails={movie as unknown as MovieDetails}
+            />
+          )}
+        </CardFooter>
+      )}
     </Card>
   );
 }
