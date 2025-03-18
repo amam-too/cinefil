@@ -24,14 +24,15 @@ export default async function HomePage({
       <SearchConfig />
       <div className="flex flex-row items-start justify-center">
         {!query ? (
+          /* Grille des films déjà proposés. */
           <Propositions displayShown={displayShown} />
         ) : (
           <Suspense key={query} fallback={<div>Loading...</div>}>
+            {/* Grille des films correspondant à la recherche. */}
             <MoviesGrid
               movies={(await searchMovies(query)).results}
               filmId={Number(filmId)}
               displayShown={displayShown}
-              forProposition={false}
               votedMovies={votedMovies}
             />
           </Suspense>

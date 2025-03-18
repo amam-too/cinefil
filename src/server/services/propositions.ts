@@ -1,9 +1,9 @@
 "use server"
 
-import { type ProposeAMovieResponse } from "@/types/responses";
-import { type Proposition } from "@/types/proposition";
-import { createClient } from "@/utils/supabase/server";
-import { revalidatePath } from "next/cache";
+import {type ProposeAMovieResponse} from "@/types/responses";
+import {type Proposition} from "@/types/proposition";
+import {createClient} from "@/utils/supabase/server";
+import {revalidatePath} from "next/cache";
 
 /**
  * Propose a movie.
@@ -71,7 +71,7 @@ export async function removeProposition(tmdb_id: number): Promise<ProposeAMovieR
 }
 
 /**
- * Returns the number of propositions for the current user.
+ * Returns the propositions for the current user.
  */
 export async function getCurrentPropositions(): Promise<Proposition[]> {
     const supabase = createClient()
@@ -96,3 +96,39 @@ export async function getCurrentPropositions(): Promise<Proposition[]> {
     
     return propositions as Proposition[];
 }
+
+/**
+ * Fetch all movies ids that have been proposed.
+ */
+export async function fetchProposedMoviesIds(): Promise<{ tmdb_id: number }[]> {
+    const { data, error } = await createClient()
+        .from("suggestions")
+        .select("tmdb_id");
+
+    if (error) {
+        console.error("Error fetching movies:", error);
+        return [];
+    }
+
+    return data;
+};
+
+/**
+ * Fetch all movies ids that have been shown.
+ */
+export async function  fetchShownMoviesIds(): Promise<
+    { tmdb_id: number; shown_at: string }[]
+> {
+    // Fetch only movies ids with non-null "shown_at".
+    const { data, error } = await createClient()
+        .from("suggestions")
+        .select("tmdb_id,  shown_at")
+        .not("shown_at", "is", null);
+
+    if (error) {
+        console.error("Error fetching shown movies:", error);
+        return [];
+    }
+
+    return data;
+};
