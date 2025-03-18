@@ -38,7 +38,6 @@ export default async function Propositions({
       <Suspense fallback={<p>Loading...</p>}>
         <MoviesGrid
           movies={(await fetchPropositions()) as unknown as Movie[]}
-          forProposition={true}
           displayShown={displayShown}
           votedMovies={await getMoviesVoted()}
         />

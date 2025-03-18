@@ -12,14 +12,14 @@ import { useDebouncedCallback } from "use-debounce";
 
 interface MovieCardProps {
   movie: Movie;
-  hasBeenProposed: boolean;
+  filmCanBeProposed: boolean;
   shown_at?: string;
   hasVoted: boolean;
 }
 
 export default function MoviesCard({
   movie,
-  hasBeenProposed,
+  filmCanBeProposed,
   shown_at,
   hasVoted,
 }: MovieCardProps) {
@@ -68,12 +68,12 @@ export default function MoviesCard({
       </div>
       {!shown_at && (
         <CardFooter className="p-4 pb-4">
-          {hasBeenProposed ? (
-            <VoteButton movieId={movie.id} initial={hasVoted} />
-          ) : (
+          {filmCanBeProposed ? (
             <ProposeMovieManager
               movieDetails={movie as unknown as MovieDetails}
             />
+          ) : (
+            <VoteButton movieId={movie.id} initial={hasVoted} />
           )}
         </CardFooter>
       )}

@@ -16,7 +16,6 @@ export async function DiscoverGrid() {
       <Suspense fallback={<p>Loading...</p>}>
         <MoviesGrid
           movies={discoverMovies.results}
-          forProposition={true}
           votedMovies={await getMoviesVoted()}
         />
       </Suspense>

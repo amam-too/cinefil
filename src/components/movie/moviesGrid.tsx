@@ -1,15 +1,17 @@
 "use server";
 import MoviesCard from "@/components/movie/movieCard";
-import { createClient } from "@/utils/supabase/server";
 import { Suspense } from "react";
 import { type Movie } from "tmdb-ts";
 import { type Vote } from "@/types/vote";
+import {
+  fetchProposedMoviesIds,
+  fetchShownMoviesIds,
+} from "@/server/services/propositions";
 
 interface MovieGridProps {
   movies: Movie[];
   filmId?: number;
   displayShown?: string | undefined;
-  forProposition: boolean;
   votedMovies: Vote[];
 }
 
@@ -17,31 +19,13 @@ export default async function MoviesGrid({
   movies,
   filmId,
   displayShown,
-  forProposition,
   votedMovies,
 }: MovieGridProps) {
-  /**
-   * Fetch all movies that have been shown.
-   */
-  const fetchShownMovies = async (): Promise<
-    { tmdb_id: number; shown_at: string }[]
-  > => {
-    // Fetch only movies ids with non-null "shown_at".
-    const { data, error } = await createClient()
-      .from("suggestions")
-      .select("tmdb_id,  shown_at")
-      .not("shown_at", "is", null);
+  const moviesId: { tmdb_id: number }[] = await fetchProposedMoviesIds();
 
-    if (error) {
-      console.error("Error fetching shown movies:", error);
-      return [];
-    }
+  const shownMoviesId: { tmdb_id: number; shown_at: string }[] =
+    await fetchShownMoviesIds();
 
-    return data;
-  };
-
-  const moviesId: { tmdb_id: number; shown_at: string }[] =
-    await fetchShownMovies();
   const displayShownBoolValue: boolean = displayShown === "true" || false;
 
   return (
@@ -57,16 +41,20 @@ export default async function MoviesGrid({
           movies.map((movie: Movie) =>
             // If the movie has been shown and displayShown is false, hide the movie (return null).
             !displayShownBoolValue &&
-            moviesId.some(
+            shownMoviesId.some(
               (value: { tmdb_id: number; shown_at: string }) =>
                 value.tmdb_id === movie.id,
             ) ? null : (
               <MoviesCard
                 key={movie.id}
                 movie={movie}
-                hasBeenProposed={forProposition}
+                filmCanBeProposed={
+                  !moviesId?.find(
+                    (value: { tmdb_id: number }) => value.tmdb_id === movie.id,
+                  )
+                }
                 shown_at={
-                  moviesId.find(
+                  shownMoviesId.find(
                     (value: { tmdb_id: number; shown_at: string }) =>
                       value.tmdb_id === movie.id,
                   )?.shown_at
