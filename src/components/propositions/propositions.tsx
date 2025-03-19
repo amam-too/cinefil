@@ -19,7 +19,9 @@ export default async function Propositions({
   };
 
   const fetchPropositions = async () => {
-    const { data, error } = await createClient()
+    const supabase = await createClient();
+    
+    const { data, error } = await supabase
       .from("suggestions")
       .select()
       .order("shown_at", { ascending: false });
