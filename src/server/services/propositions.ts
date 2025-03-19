@@ -1,16 +1,16 @@
 "use server"
 
-import {type ProposeAMovieResponse} from "@/types/responses";
-import {type Proposition} from "@/types/proposition";
-import {createClient} from "@/utils/supabase/server";
-import {revalidatePath} from "next/cache";
+import { type Proposition } from "@/types/proposition";
+import { type ProposeAMovieResponse } from "@/types/responses";
+import { createClient } from "@/utils/supabase/server";
+import { revalidatePath } from "next/cache";
 
 /**
  * Propose a movie.
  * @param tmdb_id
  */
 export async function proposeMovie(tmdb_id: number): Promise<ProposeAMovieResponse> {
-    const supabase = createClient()
+    const supabase = await createClient()
     const currentPropositions = await getCurrentPropositions();
     
     if (currentPropositions.length >= 3) {
@@ -29,7 +29,7 @@ export async function proposeMovie(tmdb_id: number): Promise<ProposeAMovieRespon
     
     const user_id = userData.user.id;
     
-    const { error } = await supabase
+    const {error} = await supabase
         .from("suggestions")
         .insert({
             tmdb_id: tmdb_id,
@@ -52,9 +52,9 @@ export async function proposeMovie(tmdb_id: number): Promise<ProposeAMovieRespon
  * @param tmdb_id
  */
 export async function removeProposition(tmdb_id: number): Promise<ProposeAMovieResponse> {
-    const supabase = createClient()
+    const supabase = await createClient()
     
-    const { error } = await supabase
+    const {error} = await supabase
         .from("suggestions")
         .delete()
         .eq("tmdb_id", tmdb_id)
@@ -75,7 +75,7 @@ export async function removeProposition(tmdb_id: number): Promise<ProposeAMovieR
  * Returns the propositions for the current user.
  */
 export async function getCurrentPropositions(): Promise<Proposition[]> {
-    const supabase = createClient()
+    const supabase = await createClient()
     
     const {data: userData, error: userError} = await supabase.auth.getUser();
     
@@ -92,7 +92,7 @@ export async function getCurrentPropositions(): Promise<Proposition[]> {
         .is("shown_at", null);
     
     if (propositionsError) {
-        throw new Error(`Une erreur est survenue, merci de réessayer ultérieurement. ${propositionsError?.message}`);
+        throw new Error(`Une erreur est survenue, merci de réessayer ultérieurement. ${ propositionsError?.message }`);
     }
     
     return propositions as Proposition[];
@@ -102,34 +102,38 @@ export async function getCurrentPropositions(): Promise<Proposition[]> {
  * Fetch all movies ids that have been proposed.
  */
 export async function fetchProposedMoviesIds(): Promise<{ tmdb_id: number }[]> {
-    const { data, error } = await createClient()
+    const supabase = await createClient();
+    
+    const {data, error} = await supabase
         .from("suggestions")
         .select("tmdb_id");
-
+    
     if (error) {
         console.error("Error fetching movies:", error);
         return [];
     }
-
+    
     return data;
-};
+}
 
 /**
  * Fetch all movies ids that have been shown.
+ * Fetch only movies ids with non-null "shown_at".
  */
-export async function  fetchShownMoviesIds(): Promise<
+export async function fetchShownMoviesIds(): Promise<
     { tmdb_id: number; shown_at: string }[]
 > {
-    // Fetch only movies ids with non-null "shown_at".
-    const { data, error } = await createClient()
+    const supabase = await createClient();
+    
+    const {data, error} = await supabase
         .from("suggestions")
         .select("tmdb_id,  shown_at")
         .not("shown_at", "is", null);
-
+    
     if (error) {
         console.error("Error fetching shown movies:", error);
         return [];
     }
-
+    
     return data;
-};
+}

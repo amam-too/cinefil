@@ -10,7 +10,7 @@ import {type Vote} from "@/types/vote";
  * @param tmdb_id
  */
 export async function voteForMovie(tmdb_id: string): Promise<VoteForMovieResponse> {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const {data: session, error: sessionError} = await supabase.auth.getUser();
 
@@ -48,7 +48,7 @@ export async function voteForMovie(tmdb_id: string): Promise<VoteForMovieRespons
  * @param tmdb_id
  */
 export async function deleteVoteForMovie(tmdb_id: string): Promise<VoteForMovieResponse> {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const {data: session, error: sessionError} = await supabase.auth.getUser();
 
@@ -76,7 +76,7 @@ export async function deleteVoteForMovie(tmdb_id: string): Promise<VoteForMovieR
  *
  */
 export async function getMoviesVotedByUser(): Promise<Vote[]> {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const {data: session, error: sessionError} = await supabase.auth.getUser();
 
@@ -101,7 +101,7 @@ export async function getMoviesVotedByUser(): Promise<Vote[]> {
  *
  */
 export async function getAllVotes(): Promise<Vote[]> {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {data: votes, error: votesError} = await supabase
         .from("votes")
@@ -121,7 +121,7 @@ export async function getAllVotes(): Promise<Vote[]> {
  * @returns {Promise<number>}
  */
 async function getNumberOfVotesForCurrentUser(user_id: string): Promise<number> {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const {data: votes, error: votesError} = await supabase
       .from("votes")
