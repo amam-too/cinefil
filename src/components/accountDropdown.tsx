@@ -11,7 +11,7 @@ import Link from "next/link";
  * @constructor
  */
 export default async function AccountDropdown() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },
