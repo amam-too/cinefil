@@ -120,9 +120,7 @@ export async function fetchProposedMoviesIds(): Promise<{ tmdb_id: number }[]> {
  * Fetch all movies ids that have been shown.
  * Fetch only movies ids with non-null "shown_at".
  */
-export async function fetchShownMoviesIds(): Promise<
-    { tmdb_id: number; shown_at: string }[]
-> {
+export async function fetchShownMoviesIds(): Promise<{ tmdb_id: number; shown_at: string }[]> {
     const supabase = await createClient();
     
     const {data, error} = await supabase
