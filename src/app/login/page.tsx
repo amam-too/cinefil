@@ -1,9 +1,11 @@
+"use client"
+
 import { login } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DiscordLogoIcon } from "@radix-ui/react-icons";
 
-export default async function LoginPage() {
+export default function LoginPage() {
     const onClick = async () => {
         await login("discord");
     }
