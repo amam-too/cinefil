@@ -7,14 +7,14 @@ import { Suspense } from "react";
 
 export default function Navbar() {
     return (
-        <div className="flex items-center justify-between w-full h-16 px-12 backdrop-blur-2xl">
+        <div className="flex items-center fixed top-0 z-10 justify-between w-full px-12 py-6">
             <div className="flex items-center">
                 <Link href="/" className="px-4">
                     <Image src={ logo } alt="cinéfil logo" width={ 75 } height={ 75 }/>
                 </Link>
             </div>
             <div className="flex items-center gap-4">
-                <Link href="/search" className="flex items-center gap-2">
+                <Link href="/search" className="flex items-center gap-2 hover:bg-white/10 p-2 rounded-full transition-all hover:px-4">
                     <SearchIcon/>
                     Search
                 </Link>
