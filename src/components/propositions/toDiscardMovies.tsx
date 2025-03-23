@@ -44,7 +44,7 @@ export function ToDiscardMovies({ handleChoice }: ToDiscardMoviesProps) {
                 <img
                     src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                     alt={movie.title}
-                    className="rounded-lg object-cover w-full h-auto aspect-[2/3]"
+                    className="object-cover w-full h-auto aspect-[2/3]"
                 />
                 
                 <div className="flex flex-col p-2 px-3 w-full text-center items-center">
@@ -68,9 +68,9 @@ function MoviesSkeleton() {
         .fill(null)
         .map((_, index) => (
             <div key={index} className="flex flex-col items-center justify-between gap-4 w-full max-w-[200px]">
-                <div className="bg-stone-800 w-full h-[300px] rounded-lg animate-pulse"></div>
-                <div className="bg-stone-800 w-full h-8 rounded-lg animate-pulse"></div>
-                <div className="bg-stone-800 w-full h-8 rounded-lg animate-pulse"></div>
+                <div className="bg-stone-800 w-full h-[300px] animate-pulse"></div>
+                <div className="bg-stone-800 w-full h-8 animate-pulse"></div>
+                <div className="bg-stone-800 w-full h-8 animate-pulse"></div>
             </div>
         ));
 }
