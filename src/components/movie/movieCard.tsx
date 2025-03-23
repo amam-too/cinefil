@@ -28,21 +28,21 @@ export default function MoviesCard({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-
+  
   const selectMovie = useDebouncedCallback((filmId: number): void => {
     const params = new URLSearchParams(searchParams);
-
+    
     if (filmId) {
       params.set(SearchParams.FILM_ID, filmId.toString());
     } else {
       params.delete(SearchParams.FILM_ID);
     }
-
+    
     router.replace(`${pathname}?${params.toString()}`);
   }, 300);
-
+  
   return (
-    <Card
+  <Card
       className="flex cursor-pointer flex-col justify-between"
       key={movie.id}
     >
@@ -52,7 +52,7 @@ export default function MoviesCard({
           <img
             src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
             alt={movie.title}
-            className={`h-full max-h-40 w-full rounded-lg rounded-b-none object-cover ${shown_at ? "opacity-50 grayscale" : ""}`}
+            className={`h-full max-h-40 w-full rounded-b-none object-cover ${shown_at ? "opacity-50 grayscale" : ""}`}
           />
 
           <div className="p-2 px-3">

@@ -36,7 +36,7 @@ export default async function MovieDetails({
   return (
     <Card
       key={movieDetails.id}
-      className="relative m-10 flex h-full w-full flex-col overflow-hidden rounded-lg shadow-lg"
+      className="relative m-10 flex h-full w-full flex-col overflow-hidden shadow-lg"
     >
       {/* Background Image with Overlay */}
       <div
@@ -54,14 +54,14 @@ export default async function MovieDetails({
           <img
             src={posterUrl}
             alt={movieDetails.title}
-            className="h-full w-2/3 rounded-lg object-cover sm:w-full"
+            className="h-full w-2/3 object-cover sm:w-full"
           />
         </div>
         <CloseDetailsButton />
       </div>
 
       {/* Card Content with Overlay Text */}
-      <div className="relative z-10 mt-4 flex flex-col justify-center text-left text-white">
+      <div className="relative z-10 mt-4 flex flex-col justify-center text-left">
         <CardHeader className="mb-2">
           <CardTitle className="text-4xl font-bold">
             {movieDetails.title}
