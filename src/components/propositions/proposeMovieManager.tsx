@@ -2,24 +2,24 @@
 
 import DiscardOneMovieDialog from "@/components/propositions/discardOneMovieDialog";
 import ProposeButton from "@/components/propositions/proposeButton";
+import { type EnhancedMovie } from "@/server/services/movie-service";
 import { getCurrentPropositions, proposeMovie, removeProposition } from "@/server/services/propositions";
 import React, { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { type MovieDetails } from "tmdb-ts";
 
 interface ProposeMovieManagerProps {
-    movieDetails: MovieDetails;
+    movie: EnhancedMovie;
 }
 
-export default function ProposeMovieManager({movieDetails}: ProposeMovieManagerProps) {
+export default function ProposeMovieManager({movie}: ProposeMovieManagerProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [pendingMovie, setPendingMovie] = useState<MovieDetails | null>(null);
+    const [pendingMovie, setPendingMovie] = useState<EnhancedMovie | null>(null);
     const [loading, startTransition] = useTransition();
     
     /**
      * Handle proposing a movie.
      */
-    const handleProposeMovie = (movie: MovieDetails) => {
+    const handleProposeMovie = (movie: EnhancedMovie) => {
         startTransition(async () => {
             const currentPropositions = await getCurrentPropositions();
             
@@ -82,7 +82,7 @@ export default function ProposeMovieManager({movieDetails}: ProposeMovieManagerP
     return (
         <div>
             <ProposeButton
-                onClick={ () => handleProposeMovie(movieDetails) }
+                onClick={ () => handleProposeMovie(movie) }
                 loading={ loading }
             />
             <DiscardOneMovieDialog
