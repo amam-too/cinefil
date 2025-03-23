@@ -1,13 +1,13 @@
 "use server";
 import MoviesCard from "@/components/movie/movieCard";
+import { type EnhancedMovie } from "@/server/services/movie-service";
 import { fetchProposedMoviesIds, fetchShownMoviesIds } from "@/server/services/propositions";
 import { getAllVotes } from "@/server/services/votes";
 import { type Vote } from "@/types/vote";
 import { Suspense } from "react";
-import { type Movie } from "tmdb-ts";
 
 interface MovieGridProps {
-    movies: Movie[];
+    movies: EnhancedMovie[];
     filmId?: number;
     displayShown?: string | undefined;
     votedMovies: Vote[];
@@ -46,7 +46,7 @@ export default async function MoviesGrid({
                 }` }
             >
                 { movies?.length > 0 ? (
-                    movies.map((movie: Movie) =>
+                    movies.map((movie: EnhancedMovie) =>
                         // If the movie has been shown and displayShown is false, hide the movie (return null).
                         !displayShownBoolValue &&
                         shownMoviesId.some(
