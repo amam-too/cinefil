@@ -3,6 +3,7 @@
 import {type VoteForMovieResponse} from "@/types/responses";
 import {createClient} from "@/utils/supabase/server";
 import {type Vote} from "@/types/vote";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Votes for one movie.
@@ -134,4 +135,21 @@ async function getNumberOfVotesForCurrentUser(user_id: string): Promise<number> 
     }
 
     return votes ? votes.length : 0
+}
+
+/**
+ * Check if the user has already voted for this movie.
+ * @param supabase
+ * @param movieId
+ * @param userId
+ */
+export async function hasUserVoted(supabase: SupabaseClient<any, "public", any>, movieId: number, userId?: string) {
+    if (!userId) return false;
+    const {data} = await supabase
+        .from("movie_votes")
+        .select("id")
+        .eq("movie_id", movieId)
+        .eq("user_id", userId)
+        .single();
+    return !!data;
 }
