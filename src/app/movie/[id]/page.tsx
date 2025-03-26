@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getEnhancedMovie } from "@/server/services/movie-service"
 import { format, formatDistance } from "date-fns"
-import { Calendar, Clock, ExternalLink, MessageCircle, Star, User } from "lucide-react"
+import { Calendar, Clock, ExternalLink, Star, User } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -45,7 +45,7 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                     {/* Left column - Movie poster and actions */ }
                     <div className="md:col-span-1">
-                        <div className="sticky top-8">
+                        <div className="sticky top-20">
                             <div className="relative aspect-[2/3] overflow-hidden rounded-lg shadow-2xl">
                                 { movie.poster_path ? (
                                     <Image
@@ -73,17 +73,6 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                                             <Button className="w-full">Voter</Button>
                                         ) }
                                 </Suspense>
-                                
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Button className="w-full" variant="secondary">
-                                        <MessageCircle className="w-4 h-4"/>
-                                        Commenter
-                                    </Button>
-                                    <Button className="w-full" variant="outline">
-                                        <Star className="w-4 h-4 mr-2"/>
-                                        Noter
-                                    </Button>
-                                </div>
                                 
                                 {/* External links */ }
                                 <div className="pt-2">
@@ -210,14 +199,14 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                                 <div className="flex items-center justify-between mb-4">
                                     <h4 className="text-lg font-medium text-gray-200">Acteurs</h4>
                                     <Button variant="ghost" size="sm" asChild className="text-gray-400 hover:text-white">
-                                        <Link href={ `/movie/${ movie.id }/cast` }>Tout voir</Link>
+                                        <Link href={ `https://www.themoviedb.org/movie/${ movie.id }/cast` } target="_blank">Tout voir</Link>
                                     </Button>
                                 </div>
                                 
                                 <div className="overflow-x-auto pb-2 -mx-4 px-4">
                                     <div className="flex space-x-4" style={ {minWidth: "max-content"} }>
                                         { movie.cast ? movie.cast.slice(0, 6).map((person) => (
-                                            <Link key={ `${ person.id }-${ person.order }` } href={ `/person/${ person.id }` } className="group">
+                                            <Link key={ `${ person.id }-${ person.order }` } href={ `https://www.themoviedb.org/person/${ person.id }` } target="_blank" className="group">
                                                 <div className="w-28">
                                                     <div className="relative w-28 h-40 rounded-lg overflow-hidden bg-gray-800 mb-2 group-hover:opacity-90 transition-opacity">
                                                         { person.profile_path ? (
