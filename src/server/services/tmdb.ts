@@ -1,7 +1,7 @@
 'use server'
 
 import { RateLimiterMemory } from 'rate-limiter-flexible';
-import { type Credits, type Movie, type MovieDetails, type Search, TMDB } from 'tmdb-ts';
+import { type Credits, type Movie, type MovieDetails, type Recommendations, type Search, TMDB } from 'tmdb-ts';
 
 const tmdb = new TMDB(process.env.TMDB_API_TOKEN!);
 const rateLimiter = new RateLimiterMemory({
@@ -57,10 +57,10 @@ export const getDiscoverMovies = async (): Promise<Search<Movie>> => {
     }
 }
 
-export const getSuggestions = async (id: number): Promise<Search<Movie>> => {
+export const getSuggestions = async (id: number): Promise<Recommendations> => {
     await handleRateLimit(id);
     try {
-        return await tmdb.movies.similar(id);
+        return await tmdb.movies.recommendations(id);
     } catch (err) {
         console.error('Error fetching suggestions:', err);
         throw new Error('Failed to get suggestions for movie from TMDB.');
