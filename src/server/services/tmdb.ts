@@ -20,7 +20,7 @@ const handleRateLimit = async (key: string | number) => {
 export const searchMovies = async (query: string): Promise<Search<Movie>> => {
     await handleRateLimit(query);
     try {
-        return await tmdb.search.movies({query});
+        return await tmdb.search.movies({query, include_adult: false});
     } catch (err) {
         console.error('Error fetching movies:', err);
         throw new Error('Failed to fetch movies from TMDB.');
