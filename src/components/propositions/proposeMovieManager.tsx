@@ -2,7 +2,7 @@
 
 import DiscardOneMovieDialog from "@/components/propositions/discardOneMovieDialog";
 import ProposeButton from "@/components/propositions/proposeButton";
-import { type EnhancedMovie } from "@/server/services/movie-service";
+import { type EnhancedMovie } from "@/server/services/movie";
 import { getCurrentPropositions, proposeMovie, removeProposition } from "@/server/services/propositions";
 import React, { useState, useTransition } from "react";
 import { toast } from "sonner";
