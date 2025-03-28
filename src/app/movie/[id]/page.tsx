@@ -4,6 +4,7 @@ import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import CountryFlagBadge from "@/components/ui/country-flag-badge";
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getEnhancedMovie } from "@/server/services/movie"
@@ -127,6 +128,10 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                             <div className="flex items-center">
                                 <Star className="w-4 h-4 mr-2 text-yellow-400 fill-yellow-400"/>
                                 <span>{ movie.vote_average.toFixed(1) } ({ movie.vote_count } votes)</span>
+                            </div>
+                            
+                            <div className="flex items-center">
+                                <CountryFlagBadge code={movie.original_language} displayName />
                             </div>
                         </div>
                         
