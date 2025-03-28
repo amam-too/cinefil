@@ -131,7 +131,7 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                             </div>
                             
                             <div className="flex items-center">
-                                <CountryFlagBadge code={movie.original_language} displayName />
+                                <CountryFlagBadge code={movie.original_language} />
                             </div>
                         </div>
                         
