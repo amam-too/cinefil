@@ -1,10 +1,12 @@
+import MovieRecommendations from "@/components/movie/movie-recommendations";
+import MovieRecommendationsSkeleton from "@/components/movie/movie-recommendations-skeleton";
 import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getEnhancedMovie } from "@/server/services/movie-service"
+import { getEnhancedMovie } from "@/server/services/movie"
 import { format, formatDistance } from "date-fns"
 import { Calendar, Clock, ExternalLink, Star, User } from "lucide-react"
 import Image from "next/image"
@@ -263,36 +265,9 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                                 
                                 <div>
                                     <h3 className="text-2xl font-medium mb-6">Films similaires</h3>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                        { movie.recommendations.slice(0, 4).map((recommendation) => (
-                                            <Link key={ recommendation.id } href={ `/movie/${ recommendation.id }` } className="group">
-                                                <div className="space-y-2">
-                                                    <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800 group-hover:opacity-90 transition-opacity">
-                                                        { recommendation.poster_path ? (
-                                                            <Image
-                                                                src={ `https://image.tmdb.org/t/p/w300${ recommendation.poster_path }` }
-                                                                alt={ recommendation.title }
-                                                                fill
-                                                                className="object-cover"
-                                                            />
-                                                        ) : (
-                                                            <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-xs text-center p-2">
-                                                                No image
-                                                            </div>
-                                                        ) }
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-medium truncate group-hover:text-gray-300 transition-colors">
-                                                            { recommendation.title }
-                                                        </p>
-                                                        <p className="text-sm text-gray-400">
-                                                            { recommendation.release_date && new Date(recommendation.release_date).getFullYear() }
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        )) }
-                                    </div>
+                                    <Suspense fallback={<MovieRecommendationsSkeleton />} >
+                                        <MovieRecommendations recommendations={ movie.recommendations } fromCache={ movie.fromCache }/>
+                                    </Suspense>
                                 </div>
                             </>
                         ) }
@@ -302,4 +277,3 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
         </main>
     )
 }
-
