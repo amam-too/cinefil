@@ -1,6 +1,6 @@
 "use server";
 import MoviesCard from "@/components/movie/movieCard";
-import { type EnhancedMovie } from "@/server/services/movie-service";
+import { type EnhancedMovie } from "@/server/services/movie";
 import { fetchProposedMoviesIds, fetchShownMoviesIds } from "@/server/services/propositions";
 import { getAllVotes } from "@/server/services/votes";
 import { type Vote } from "@/types/vote";
