@@ -1,7 +1,7 @@
 import VoteButton from "@/components/customButtons/voteButton";
 import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { type EnhancedMovie } from "@/server/services/movie-service";
+import { type EnhancedMovie } from "@/server/services/movie";
 import { getHumanReadableDate, getYearOnly } from "@/utils/date";
 import Link from "next/link";
 import React from "react";
