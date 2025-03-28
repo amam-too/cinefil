@@ -1,5 +1,5 @@
 import MoviesGrid from "@/components/movie/moviesGrid";
-import { type EnhancedMovie } from "@/server/services/movie-service";
+import { type EnhancedMovie } from "@/server/services/movie";
 import { getDiscoverMovies } from "@/server/services/tmdb";
 import React, { Suspense } from "react";
 import { getMoviesVotedByUser } from "@/server/services/votes";
