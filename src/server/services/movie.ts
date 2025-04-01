@@ -1,8 +1,9 @@
 "use server"
 
+import { isMovieCurrentlyProposed } from "@/server/services/propositions";
 import { hasUserVoted } from "@/server/services/votes";
 import { createClient } from "@/utils/supabase/server";
-import { type Cast, type Crew, type Genre, type Movie, MovieDetails, type Recommendation } from "tmdb-ts";
+import { type Cast, type Crew, type Genre, type Movie, type MovieDetails, type Recommendation } from "tmdb-ts";
 import { getMovieCredits, getMovieDetails, getSuggestions } from "./tmdb";
 
 export interface EnhancedMovie extends Movie {
@@ -12,7 +13,7 @@ export interface EnhancedMovie extends Movie {
     director: Crew | null;
     writers: Crew[];
     recommendations: Recommendation[];
-    isProposed: boolean;
+    is_proposed: boolean;
     proposedBy?: string;
     proposedAt?: string;
     shown_at?: string;
@@ -39,6 +40,8 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
         .eq("tmdb_id", tmdbId)
         .single() as { data: EnhancedMovie, error: any };
     
+    const userVoted: boolean = await hasUserVoted(tmdbId, userId!);
+    
     const isCached: boolean = cachedMovie
         && cachedMovie.cast?.length > 0
         && cachedMovie.crew?.length > 0
@@ -47,7 +50,7 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
     if (isCached) {
         return {
             ...cachedMovie,
-            userHasVoted: await hasUserVoted(supabase, cachedMovie.id, userId),
+            userHasVoted: userVoted,
             fromCache: true
         } as EnhancedMovie;
     }
@@ -96,6 +99,8 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
             storeRecommendations(recs.results, tmdbId)
         ]);
         
+        const isProposed: boolean = await isMovieCurrentlyProposed(tmdbId)
+        
         return {
             ...movie,
             genres: movieDetails.genres ?? [],
@@ -104,8 +109,8 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
             director: credits.crew.find(person => person.job === "Director") ?? null,
             writers: credits.crew.filter(person => ["Screenplay", "Writer", "Story"].includes(person.job)),
             recommendations: recs.results ?? [],
-            isProposed: false,
-            userHasVoted: false,
+            is_proposed: isProposed,
+            userHasVoted: userVoted,
             voteCount: movieDetails.vote_count,
             fromCache: false,
             lastUpdated: movie.last_updated,
@@ -169,7 +174,9 @@ async function storeGenres(movieId: number, genres?: Genre[]) {
         name: genre.name
     })), {ignoreDuplicates: true}).throwOnError();
     
-    await supabase.from("movie_genres").upsert(genres.map(({id}) => ({genre_id: id, movie_id: movieId})), {onConflict: "movie_id,genre_id", ignoreDuplicates: true});
+    await supabase
+        .from("movie_genres")
+        .upsert(genres.map(({id}) => ({genre_id: id, movie_id: movieId})), {onConflict: "movie_id,genre_id", ignoreDuplicates: true});
 }
 
 async function storeProductionCompanies(movieId: number, companies?: { id: number; name: string; logo_path?: string }[]) {
@@ -239,6 +246,6 @@ async function storeRecommendations(recommendations: Recommendation[], movieId: 
         .upsert(recommendations.slice(0, 4).map(({id}) => ({
             movie_id: movieId,
             recommended_movie_id: id
-        })), {ignoreDuplicates: true})
+        })), {ignoreDuplicates: true, onConflict: "movie_id,recommended_movie_id"})
         .throwOnError();
 }
