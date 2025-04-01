@@ -1,3 +1,4 @@
+import VoteButton from "@/components/customButtons/voteButton";
 import MovieRecommendations from "@/components/movie/movie-recommendations";
 import MovieRecommendationsSkeleton from "@/components/movie/movie-recommendations-skeleton";
 import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
@@ -67,15 +68,11 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                             
                             {/* Movie actions */ }
                             <div className="mt-8 space-y-6">
-                                <Suspense fallback={ <Skeleton className="h-10 w-full"/> }>
-                                    { movie.isProposed ?
-                                        (
-                                            <ProposeMovieManager movie={ movie }/>
-                                        )
-                                        : (
-                                            <Button className="w-full">Voter</Button>
-                                        ) }
-                                </Suspense>
+                                { movie.is_proposed ? (
+                                    <VoteButton movieId={movie.id} initial={movie.userHasVoted} />
+                                ) : (
+                                    <ProposeMovieManager movie={ movie }/>
+                                ) }
                                 
                                 {/* External links */ }
                                 <div className="pt-2">
@@ -131,7 +128,7 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                             </div>
                             
                             <div className="flex items-center">
-                                <CountryFlagBadge code={movie.original_language} />
+                                <CountryFlagBadge code={ movie.original_language }/>
                             </div>
                         </div>
                         
@@ -145,20 +142,6 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                                 </Link>
                             )) }
                         </div>
-                        
-                        {/* Proposition status */ }
-                        { movie.isProposed && (
-                            <Card className="mt-8 bg-white/5 border-0">
-                                <CardContent className="p-4">
-                                    <h3 className="text-sm font-medium mb-1">Statut du film</h3>
-                                    <p className="text-gray-300">
-                                        { movie.shown_at
-                                            ? `Shown on ${ format(new Date(movie.shown_at), "MMMM d, yyyy") }`
-                                            : `Proposed ${ movie.proposedAt ? formatDistance(new Date(movie.proposedAt), new Date(), {addSuffix: true}) : "" }` }
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        ) }
                         
                         <Separator className="my-8 bg-white/10"/>
                         
@@ -270,7 +253,7 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                                 
                                 <div>
                                     <h3 className="text-2xl font-medium mb-6">Films similaires</h3>
-                                    <Suspense fallback={<MovieRecommendationsSkeleton />} >
+                                    <Suspense fallback={ <MovieRecommendationsSkeleton/> }>
                                         <MovieRecommendations recommendations={ movie.recommendations } fromCache={ movie.fromCache }/>
                                     </Suspense>
                                 </div>
