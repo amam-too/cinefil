@@ -1,4 +1,4 @@
-import MoviesGrid from "@/components/movie/moviesGrid";
+import MoviesGrid from "@/components/movie/movies-grid";
 import { type EnhancedMovie } from "@/server/services/movie";
 import { getDiscoverMovies } from "@/server/services/tmdb";
 import React, { Suspense } from "react";

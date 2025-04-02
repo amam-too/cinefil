@@ -1,4 +1,4 @@
-import MoviesGrid from "@/components/movie/moviesGrid";
+import MoviesGrid from "@/components/movie/movies-grid";
 import { type EnhancedMovie } from "@/server/services/movie";
 import { getMovieDetails } from "@/server/services/tmdb";
 import { getMoviesVotedByUser } from "@/server/services/votes";

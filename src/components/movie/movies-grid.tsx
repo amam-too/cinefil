@@ -1,5 +1,5 @@
 "use server";
-import MoviesCard from "@/components/movie/movieCard";
+import MoviesCard from "@/components/movie/movie-card";
 import { type EnhancedMovie } from "@/server/services/movie";
 import { fetchProposedMoviesIds, fetchShownMoviesIds } from "@/server/services/propositions";
 import { getAllVotes } from "@/server/services/votes";
@@ -75,7 +75,6 @@ export default async function MoviesGrid({
                     (value: Vote) => value.tmdb_id === movie.id,
                   )
                 }
-                numberOfVoteForFilm={voteCountMap.get(movie.id) ?? 0}
                 user={user}
               />
             ),

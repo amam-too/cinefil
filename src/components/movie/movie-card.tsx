@@ -1,5 +1,5 @@
-import VoteButton from "@/components/customButtons/voteButton";
-import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
+import VoteButton from "@/components/movie-actions/vote-button";
+import ProposeMovieManager from "@/components/propositions/propose-movie-manager";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { type EnhancedMovie } from "@/server/services/movie";
 import { getHumanReadableDate, getYearOnly } from "@/utils/date";
@@ -12,7 +12,6 @@ interface MovieCardProps {
   filmCanBeProposed: boolean;
   shown_at?: string;
   userHasVotedFor: boolean;
-  numberOfVoteForFilm: number;
   user: User | null;
 }
 
@@ -21,7 +20,6 @@ export default function MoviesCard({
   filmCanBeProposed,
   shown_at,
   userHasVotedFor,
-  numberOfVoteForFilm,
   user,
 }: MovieCardProps) {
   return (
@@ -59,7 +57,6 @@ export default function MoviesCard({
             <VoteButton
               movieId={movie.id}
               initial={userHasVotedFor}
-              numberOfVoteForFilm={numberOfVoteForFilm}
             />
           )}
         </CardFooter>
