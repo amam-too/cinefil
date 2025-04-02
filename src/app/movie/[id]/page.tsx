@@ -76,7 +76,7 @@ export default async function MovieDetailPage({
               {/* Movie actions */}
               <div className="mt-8 space-y-6">
                 {movie.is_proposed ? (
-                  <VoteButton movieId={movie.id} initial={movie.userHasVoted} />
+                  <VoteButton movieId={ movie.id } initial={ movie.userHasVoted }/>
                 ) : (
                   <ProposeMovieManager movie={movie} />
                 )}

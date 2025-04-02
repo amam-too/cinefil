@@ -170,7 +170,12 @@ async function getNumberOfVotesForCurrentUser(user_id: string): Promise<number> 
  * @param movie_id
  * @param user_id
  */
-export async function hasUserVoted(movie_id: number, user_id: string): Promise<boolean> {
+export async function hasUserVoted(movie_id: number, user_id: string | undefined): Promise<boolean> {
+    if (!user_id) {
+        console.error("User ID is undefined.");
+        return false;
+    }
+
     const supabase = await createClient();
 
     let currentCampaign;
@@ -195,8 +200,8 @@ export async function hasUserVoted(movie_id: number, user_id: string): Promise<b
         .limit(1)
     
     if (error) {
-        console.error(error);
-        throw new Error(error.message ?? "Une erreur est survenue lors de la vérification du vote utilisateur");
+        console.error(`Error fetching whether user voted for movie proposal:`, error.message);
+        return false;
     }
     
     return !!data?.length;

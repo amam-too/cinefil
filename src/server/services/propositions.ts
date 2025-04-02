@@ -134,8 +134,8 @@ export async function isMovieCurrentlyProposed(movie_id: number): Promise<boolea
         .limit(1);
     
     if (error) {
-        console.error(error);
-        throw new Error(error.message ?? "Une erreur est survenue");
+        console.error(`Une erreur est survenue lors de la vérification de la proposition du film :`, error.message);
+        throw new Error(error.message ?? "Échec de la vérification du statut de proposition du film.");
     }
     
     return !!data?.length;
