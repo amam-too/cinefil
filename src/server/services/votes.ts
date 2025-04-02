@@ -93,7 +93,8 @@ export async function getMoviesVotedByUser(): Promise<Vote[]> {
     const {data: session, error: sessionError} = await supabase.auth.getUser();
     
     if (sessionError || !session) {
-        throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
+        return [] as Vote[]
+        // throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
     }
     
     const currentCampaign = await getCurrentCampaign();

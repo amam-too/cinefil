@@ -102,7 +102,8 @@ export async function getCurrentPropositions(): Promise<Proposition[]> {
     const {data: userData, error: userError} = await supabase.auth.getUser();
     
     if (!userData.user?.id || userError) {
-        throw new Error(userError?.message ?? "User not found.");
+        return [] as Proposition[];
+        // throw new Error(userError?.message ?? "User not found.");
     }
     
     const user_id = userData.user.id;
@@ -114,6 +115,7 @@ export async function getCurrentPropositions(): Promise<Proposition[]> {
         .is("removed_at", null);
     
     if (propositionsError) {
+        return [] as Proposition[];
         console.error(propositionsError)
         throw new Error(`Une erreur est survenue, merci de réessayer ultérieurement. ${ propositionsError?.message }`);
     }

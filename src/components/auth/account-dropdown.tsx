@@ -1,10 +1,15 @@
 import AccountSignOutButton from "@/components/auth/account-sign-out-button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { createClient } from "@/utils/supabase/server";
-import { type User } from "@supabase/auth-js";
-import Link from "next/link";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import {createClient} from "@/utils/supabase/server";
+import {type User} from "@supabase/auth-js";
+import SignInButton from "@/components/auth/sign-in-button";
 
 /**
  * Account dropdown.
@@ -15,13 +20,9 @@ export default async function AccountDropdown() {
     const supabase = await createClient();
     
     const {data: {user}} = (await supabase.auth.getUser()) as { data: { user: User | null } };
-    
+
     if (!user) {
-        return (
-            <Link href="/login">
-                <Button variant="outline">Sign in</Button>
-            </Link>
-        )
+        return <SignInButton />
     }
     
     return (
