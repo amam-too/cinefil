@@ -22,7 +22,7 @@ export default async function Propositions({
         const supabase = await createClient();
         
         const {data, error} = await supabase
-            .from("suggestions")
+            .from("movie_proposals")
             .select()
             .order("shown_at", {ascending: false});
         if (error) {
