@@ -1,7 +1,7 @@
-import VoteButton from "@/components/customButtons/voteButton";
+import VoteButton from "@/components/movie-actions/vote-button";
 import MovieRecommendations from "@/components/movie/movie-recommendations";
 import MovieRecommendationsSkeleton from "@/components/movie/movie-recommendations-skeleton";
-import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
+import ProposeMovieManager from "@/components/propositions/propose-movie-manager";
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import CountryFlagBadge from "@/components/ui/country-flag-badge";
