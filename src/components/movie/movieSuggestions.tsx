@@ -1,5 +1,5 @@
 import MoviesCard from "@/components/movie/movieCard";
-import { type EnhancedMovie } from "@/server/services/movie-service";
+import { type EnhancedMovie } from "@/server/services/movie";
 import { fetchProposedMoviesIds } from "@/server/services/propositions";
 import { getSuggestions } from "@/server/services/tmdb";
 import { getAllVotes } from "@/server/services/votes";

@@ -1,14 +1,10 @@
 "use server"
 
+import { isMovieCurrentlyProposed } from "@/server/services/propositions";
+import { hasUserVoted } from "@/server/services/votes";
 import { createClient } from "@/utils/supabase/server";
-import { type SupabaseClient } from "@supabase/supabase-js";
-import { type Cast, type Crew, type Movie } from "tmdb-ts";
+import { type Cast, type Crew, type Genre, type Movie, type MovieDetails, type Recommendation } from "tmdb-ts";
 import { getMovieCredits, getMovieDetails, getSuggestions } from "./tmdb";
-
-interface Genre {
-    id: number;
-    name: string;
-}
 
 export interface EnhancedMovie extends Movie {
     genres: Genre[];
@@ -16,8 +12,8 @@ export interface EnhancedMovie extends Movie {
     crew: Crew[];
     director: Crew | null;
     writers: Crew[];
-    recommendations: Movie[];
-    isProposed: boolean;
+    recommendations: Recommendation[];
+    is_proposed: boolean;
     proposedBy?: string;
     proposedAt?: string;
     shown_at?: string;
@@ -40,19 +36,21 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
     
     const {data: cachedMovie, error} = await supabase
         .from("enhanced_movies")
-        .select("*, movie_cast(*)")
+        .select("*")
         .eq("tmdb_id", tmdbId)
-        .single() as { data: EnhancedMovie & { movie_cast: Cast[] }, error: any };
+        .single() as { data: EnhancedMovie, error: any };
     
-    const isCached: boolean = cachedMovie && cachedMovie.movie_cast.length > 0 && !error;
+    const userVoted: boolean = await hasUserVoted(tmdbId, userId!);
     
-    // show if it is in cache or not
-    console.log("strategy", isCached ? "cache" : "api");
+    const isCached: boolean = cachedMovie
+        && cachedMovie.cast?.length > 0
+        && cachedMovie.crew?.length > 0
+        && !error;
     
     if (isCached) {
         return {
             ...cachedMovie,
-            userHasVoted: await hasUserVoted(supabase, cachedMovie.id, userId),
+            userHasVoted: userVoted,
             fromCache: true
         } as EnhancedMovie;
     }
@@ -80,7 +78,10 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
             last_updated: new Date().toISOString()
         };
         
-        await supabase.from("movies").upsert(movie, {onConflict: "tmdb_id"}).throwOnError();
+        await supabase
+            .from("movies")
+            .upsert(movie, {onConflict: "tmdb_id"})
+            .throwOnError();
         
         await Promise.all([
             storeGenres(tmdbId, movieDetails.genres),
@@ -98,6 +99,8 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
             storeRecommendations(recs.results, tmdbId)
         ]);
         
+        const isProposed: boolean = await isMovieCurrentlyProposed(tmdbId)
+        
         return {
             ...movie,
             genres: movieDetails.genres ?? [],
@@ -106,8 +109,8 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
             director: credits.crew.find(person => person.job === "Director") ?? null,
             writers: credits.crew.filter(person => ["Screenplay", "Writer", "Story"].includes(person.job)),
             recommendations: recs.results ?? [],
-            isProposed: false,
-            userHasVoted: false,
+            is_proposed: isProposed,
+            userHasVoted: userVoted,
             voteCount: movieDetails.vote_count,
             fromCache: false,
             lastUpdated: movie.last_updated,
@@ -120,34 +123,87 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
     }
 }
 
-async function hasUserVoted(supabase: SupabaseClient<any, "public", any>, movieId: number, userId?: string) {
-    if (!userId) return false;
-    const {data} = await supabase
-        .from("movie_votes")
-        .select("id")
-        .eq("movie_id", movieId)
-        .eq("user_id", userId)
-        .single();
-    return !!data;
+export async function getEnhancedMovies(
+    tmdbIds: number[],
+    options: {
+        concurrency?: number,
+        ignoreErrors?: boolean
+    } = {}
+): Promise<MovieDetails[]> {
+    const {
+        concurrency = 4,
+        ignoreErrors = false
+    } = options;
+    
+    // Use Promise.all with a concurrency limit to fetch movies
+    const enhancedMovies: MovieDetails[] = [];
+    
+    // Process movies in batches to control concurrency
+    for (let i = 0; i < tmdbIds.length; i += concurrency) {
+        const batch = tmdbIds.slice(i, i + concurrency);
+        
+        // Fetch batch of movies concurrently
+        const batchResults = await Promise.all(
+            batch.map(async (tmdbId) => {
+                try {
+                    return await getMovieDetails(tmdbId);
+                } catch (error) {
+                    if (ignoreErrors) {
+                        console.warn(`Failed to fetch movie with TMDB ID ${ tmdbId }:`, error);
+                        return null;
+                    }
+                    throw error;
+                }
+            })
+        );
+        
+        // Filter out null results if ignoreErrors is true
+        const validResults = batchResults.filter((movie): movie is MovieDetails => movie !== null);
+        enhancedMovies.push(...validResults);
+    }
+    
+    return enhancedMovies;
 }
 
 async function storeGenres(movieId: number, genres?: Genre[]) {
     if (!genres || genres.length === 0) return;
     const supabase = await createClient();
-    await supabase.from("genres").upsert(genres);
-    await supabase.from("movie_genres").upsert(genres.map(({id}) => ({genre_id: id, movie_id: movieId})), {onConflict: "movie_id,genre_id"});
+    
+    await supabase.from("genres").upsert(genres.map(genre => ({
+        id: genre.id,
+        name: genre.name
+    })), {ignoreDuplicates: true}).throwOnError();
+    
+    await supabase
+        .from("movie_genres")
+        .upsert(genres.map(({id}) => ({genre_id: id, movie_id: movieId})), {onConflict: "movie_id,genre_id", ignoreDuplicates: true});
 }
 
 async function storeProductionCompanies(movieId: number, companies?: { id: number; name: string; logo_path?: string }[]) {
     if (!companies || companies.length === 0) return;
     const supabase = await createClient();
-    await supabase.from("production_companies").upsert(companies);
-    await supabase.from("movie_production_companies").upsert(companies.map(({id}) => ({company_id: id, movie_id: movieId})), {onConflict: "movie_id,company_id"});
+    
+    await supabase.from("production_companies").upsert(companies.map((company) => ({
+        id: company.id,
+        name: company.name,
+        logo_path: company.logo_path
+    })), {ignoreDuplicates: true}).throwOnError();
+    
+    await supabase
+        .from("movie_production_companies")
+        .upsert(
+            companies
+                .slice(0, 4)
+                .map(({id}) => ({company_id: id, movie_id: movieId})
+                ),
+            {onConflict: "movie_id,company_id", ignoreDuplicates: true})
+        .throwOnError();
 }
 
 async function storeCast(cast: Cast[], movieId: number) {
     if (!cast || cast.length === 0) return;
     const supabase = await createClient();
+    
     await supabase.from("cast_members").upsert(cast.map(cast_member => ({
         id: cast_member.id,
         name: cast_member.name,
@@ -155,6 +211,7 @@ async function storeCast(cast: Cast[], movieId: number) {
         gender: cast_member.gender,
         popularity: cast_member.popularity
     })), {ignoreDuplicates: true}).throwOnError();
+    
     await supabase
         .from("movie_cast")
         .upsert(
@@ -177,26 +234,18 @@ async function storeCrew(crew: Crew[], movieId: number) {
         gender: crew_member.gender,
         popularity: crew_member.popularity
     })), {ignoreDuplicates: true}).throwOnError();
-    await supabase.from("movie_crew").upsert(crew.map(({id, department, job}) => ({movie_id: movieId, crew_id: id, department, job})), {onConflict: "movie_id,crew_id", ignoreDuplicates: true}).throwOnError();
+    await supabase.from("movie_crew").upsert(crew.slice(0, 4).map(({id, department, job}) => ({movie_id: movieId, crew_id: id, department, job})), {onConflict: "movie_id,crew_id", ignoreDuplicates: true}).throwOnError();
 }
 
-async function storeRecommendations(recommendations: Movie[], movieId: number) {
+async function storeRecommendations(recommendations: Recommendation[], movieId: number) {
     if (!recommendations || recommendations.length === 0) return;
     const supabase = await createClient();
-    await supabase.from("movies").upsert(recommendations.map(({id, title, poster_path, backdrop_path, release_date, overview, vote_average, popularity, adult, original_language, original_title, video}) => ({
-        id,
-        tmdb_id: id,
-        title,
-        poster_path: poster_path || "",
-        backdrop_path: backdrop_path || "",
-        release_date: release_date || "",
-        overview: overview || "",
-        vote_average: vote_average || 0,
-        popularity: popularity || 0,
-        adult: adult || false,
-        original_language: original_language || "",
-        original_title: original_title || "",
-        video: video || false
-    })));
-    await supabase.from("movie_recommendations").upsert(recommendations.map(({id}) => ({movie_id: movieId, recommended_movie_id: id})));
+    
+    await supabase
+        .from("movie_recommendations")
+        .upsert(recommendations.slice(0, 4).map(({id}) => ({
+            movie_id: movieId,
+            recommended_movie_id: id
+        })), {ignoreDuplicates: true, onConflict: "movie_id,recommended_movie_id"})
+        .throwOnError();
 }

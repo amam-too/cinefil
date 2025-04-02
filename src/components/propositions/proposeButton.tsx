@@ -8,11 +8,11 @@ interface ProposeButtonProps {
 
 export default function ProposeButton({onClick, loading}: ProposeButtonProps) {
     return loading ? (
-            <Button variant="outline" disabled>
+            <Button className="w-full" disabled>
                 <LoadingWheel/>
             </Button>)
         : (
-            <Button variant="outline" onClick={ onClick }>
+            <Button className="w-full" onClick={ onClick }>
                 Proposer le film
             </Button>
         );
