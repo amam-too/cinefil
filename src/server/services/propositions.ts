@@ -129,7 +129,7 @@ export async function isMovieCurrentlyProposed(movie_id: number): Promise<boolea
     const {data, error} = await supabase
         .from("enhanced_movies")
         .select()
-        .eq("movie_id", movie_id)
+        .eq("tmdb_id", movie_id)
         .is("is_proposed", null)
         .limit(1);
     
