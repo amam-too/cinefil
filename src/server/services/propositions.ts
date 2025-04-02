@@ -1,9 +1,9 @@
 "use server"
 
-import { type Proposition } from "@/types/proposition";
-import { type ProposeAMovieResponse } from "@/types/responses";
-import { createClient } from "@/utils/supabase/server";
-import { revalidatePath } from "next/cache";
+import {type Proposition} from "@/types/proposition";
+import {type ProposeAMovieResponse} from "@/types/responses";
+import {createClient} from "@/utils/supabase/server";
+import {revalidatePath} from "next/cache";
 
 /**
  * Propose a movie.
@@ -80,7 +80,8 @@ export async function getCurrentPropositions(): Promise<Proposition[]> {
     const {data: userData, error: userError} = await supabase.auth.getUser();
     
     if (!userData.user?.id || userError) {
-        throw new Error(userError?.message ?? "User not found.");
+        return [] as Proposition[];
+        // throw new Error(userError?.message ?? "User not found.");
     }
     
     const user_id = userData.user.id;
@@ -92,7 +93,8 @@ export async function getCurrentPropositions(): Promise<Proposition[]> {
         .is("shown_at", null);
     
     if (propositionsError) {
-        throw new Error(`Une erreur est survenue, merci de réessayer ultérieurement. ${ propositionsError?.message }`);
+        return [] as Proposition[];
+        // throw new Error(`Une erreur est survenue, merci de réessayer ultérieurement. ${ propositionsError?.message }`);
     }
     
     return propositions as Proposition[];
