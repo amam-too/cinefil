@@ -53,8 +53,8 @@ export default async function MoviesGrid({
             // If the movie has been shown and displayShown is false, hide the movie (return null).
             !displayShownBoolValue &&
             shownMoviesId.some(
-              (value: { tmdb_id: number; shown_at: string }) =>
-                value.tmdb_id === movie.id,
+              (value: { movie_id: number; shown_at: string }) =>
+                value.movie_id === movie.id,
             ) ? null : (
               <MoviesCard
                 key={movie.id}
@@ -66,8 +66,8 @@ export default async function MoviesGrid({
                 }
                 shown_at={
                   shownMoviesId.find(
-                    (value: { tmdb_id: number; shown_at: string }) =>
-                      value.tmdb_id === movie.id,
+                    (value: { movie_id: number; shown_at: string }) =>
+                      value.movie_id === movie.id,
                   )?.shown_at
                 }
                 userHasVotedFor={
