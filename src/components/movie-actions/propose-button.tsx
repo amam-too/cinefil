@@ -1,4 +1,4 @@
-import LoadingWheel from "@/components/loadingWheel";
+import LoadingWheel from "@/components/ui/loading-wheel";
 import { Button } from "@/components/ui/button";
 
 interface ProposeButtonProps {
