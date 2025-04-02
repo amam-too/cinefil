@@ -4,12 +4,11 @@ import MovieRecommendationsSkeleton from "@/components/movie/movie-recommendatio
 import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import CountryFlagBadge from "@/components/ui/country-flag-badge";
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getEnhancedMovie } from "@/server/services/movie"
-import { format, formatDistance } from "date-fns"
+import { format } from "date-fns"
 import { Calendar, Clock, ExternalLink, Star, User } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -69,7 +68,7 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                             {/* Movie actions */ }
                             <div className="mt-8 space-y-6">
                                 { movie.is_proposed ? (
-                                    <VoteButton movieId={movie.id} initial={movie.userHasVoted} />
+                                    <VoteButton movieId={ movie.id } initial={ movie.userHasVoted }/>
                                 ) : (
                                     <ProposeMovieManager movie={ movie }/>
                                 ) }
