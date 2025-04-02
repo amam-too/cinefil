@@ -1,5 +1,5 @@
-import { DiscoverGrid } from "@/components/discoverGrid";
-import MoviesGrid from "@/components/movie/moviesGrid";
+import { DiscoverGrid } from "@/components/discover-grid";
+import MoviesGrid from "@/components/movie/movies-grid";
 import { Suspense } from "react";
 
 export default async function HomePage() {
