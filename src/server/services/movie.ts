@@ -40,7 +40,7 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
         .eq("tmdb_id", tmdbId)
         .single() as { data: EnhancedMovie, error: any };
     
-    const userVoted: boolean = await hasUserVoted(tmdbId, userId!);
+    const userVoted: boolean = userId ? await hasUserVoted(tmdbId, userId) : false;
     
     const isCached: boolean = cachedMovie
         && cachedMovie.cast?.length > 0
@@ -80,7 +80,7 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
         
         await supabase
             .from("movies")
-            .upsert(movie, {onConflict: "tmdb_id"})
+            .upsert(movie, {onConflict: "tmdb_id", ignoreDuplicates: true})
             .throwOnError();
         
         await Promise.all([
