@@ -1,10 +1,10 @@
 "use server";
 
-import { getCurrentCampaign } from "@/server/services/campaigns";
-import { getPropositionById } from "@/server/services/propositions";
-import { type VoteForMovieResponse } from "@/types/responses";
-import { type Vote } from "@/types/vote";
-import { createClient } from "@/utils/supabase/server";
+import {getCurrentCampaign} from "@/server/services/campaigns";
+import {getPropositionById} from "@/server/services/propositions";
+import {type VoteForMovieResponse} from "@/types/responses";
+import {type Vote} from "@/types/vote";
+import {createClient} from "@/utils/supabase/server";
 
 /**
  * Votes for one movie.
@@ -118,9 +118,19 @@ export async function getMoviesVotedByUser(): Promise<Vote[]> {
  */
 export async function getAllVotes(): Promise<Vote[]> {
     const supabase = await createClient();
-    
-    const currentCampaign = await getCurrentCampaign();
-    
+
+    let currentCampaign;
+    try {
+        currentCampaign = await getCurrentCampaign();
+    } catch (error) {
+        console.error("Error fetching current campaign:", error);
+        return []; // Return an empty array if fetching the campaign fails
+    }
+
+    if (!currentCampaign) {
+        return []; // Handle the case where getCurrentCampaign returns null or undefined
+    }
+
     const {data: votes, error: votesError} = await supabase
         .from("movie_votes")
         .select()
@@ -128,10 +138,11 @@ export async function getAllVotes(): Promise<Vote[]> {
     
     if (votesError) {
         console.error("Error fetching votes :", votesError);
-        throw new Error("Une erreur est survenue lors de la récupération des votes.");
+        return [];
+        //throw new Error("Une erreur est survenue lors de la récupération des votes.");
     }
     
-    return votes as Vote[]
+    return votes as Vote[];
 }
 
 /**
@@ -161,9 +172,19 @@ async function getNumberOfVotesForCurrentUser(user_id: string): Promise<number> 
  */
 export async function hasUserVoted(movie_id: number, user_id: string): Promise<boolean> {
     const supabase = await createClient();
-    
-    const currentCampaign = await getCurrentCampaign();
-    
+
+    let currentCampaign;
+    try {
+        currentCampaign = await getCurrentCampaign();
+    } catch (error) {
+        console.error("Error fetching current campaign:", error);
+        return false; // Return an empty array if fetching the campaign fails
+    }
+
+    if (!currentCampaign) {
+        return false; // Handle the case where getCurrentCampaign returns null or undefined
+    }
+
     // Todo: fix this
     const {data, error} = await supabase
         .from("movie_votes")
