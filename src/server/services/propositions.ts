@@ -1,10 +1,10 @@
 "use server"
 
-import { getCurrentCampaign } from "@/server/services/campaigns";
-import { type Proposition } from "@/types/proposition";
-import { type ProposeAMovieResponse } from "@/types/responses";
-import { createClient } from "@/utils/supabase/server";
-import { revalidatePath } from "next/cache";
+import {getCurrentCampaign} from "@/server/services/campaigns";
+import {type Proposition} from "@/types/proposition";
+import {type ProposeAMovieResponse} from "@/types/responses";
+import {createClient} from "@/utils/supabase/server";
+import {revalidatePath} from "next/cache";
 
 /**
  * Propose a movie.
@@ -115,6 +115,7 @@ export async function getCurrentPropositions(): Promise<Proposition[]> {
         .is("shown_at", null);
     
     if (propositionsError) {
+        console.error(propositionsError)
         return [] as Proposition[];
     }
     
@@ -175,4 +176,41 @@ export async function fetchShownMoviesIds(): Promise<{ movie_id: number; shown_a
     }
     
     return data;
+}
+
+/**
+ * Fetch details of movies that have already been shown.
+ */
+export async function getShownMovies(): Promise<EnhancedMovie[]> {
+    const shownMovies = await fetchShownMoviesIds();
+
+    if (!shownMovies.length) return [];
+
+    try {
+        return await getEnhancedMovies(shownMovies.map(movie => movie.movie_id))
+    } catch (err) {
+        console.error("Error fetching shown movie details from TMDB:", err);
+        return [];
+    }
+}
+
+/**
+ * Returns the propositions for the current user.
+ */
+export async function getPropositions(): Promise<Proposition[]> {
+    const supabase = await createClient()
+
+    const {data: propositions, error: propositionsError} = await supabase
+        .from("movie_proposals")
+        .select()
+        .is("shown_at", null);
+
+    console.log(propositions);
+
+    if (propositionsError) {
+        console.error(propositionsError)
+        return [] as Proposition[];
+    }
+
+    return propositions as Proposition[];
 }

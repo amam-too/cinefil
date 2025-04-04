@@ -2,18 +2,18 @@ import VoteButton from "@/components/movie-actions/vote-button";
 import MovieRecommendations from "@/components/movie/movie-recommendations";
 import MovieRecommendationsSkeleton from "@/components/movie/movie-recommendations-skeleton";
 import ProposeMovieManager from "@/components/propositions/propose-movie-manager";
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import CountryFlagBadge from "@/components/ui/country-flag-badge";
-import { Separator } from "@/components/ui/separator"
-import { Skeleton } from "@/components/ui/skeleton"
-import { getEnhancedMovie } from "@/server/services/movie"
-import { format } from "date-fns"
-import { Calendar, Clock, ExternalLink, Star, User } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
-import { notFound } from "next/navigation"
-import { Suspense } from "react"
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getEnhancedMovie } from "@/server/services/movie";
+import { format } from "date-fns";
+import { Calendar, Clock, ExternalLink, Star, User } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function MovieDetailPage({params}: { params: Promise<{ id: string }> }) {
     const {id} = await params
