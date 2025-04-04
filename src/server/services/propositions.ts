@@ -1,10 +1,12 @@
 "use server"
 
-import { getCurrentCampaign } from "@/server/services/campaigns";
-import { type Proposition } from "@/types/proposition";
-import { type ProposeAMovieResponse } from "@/types/responses";
-import { createClient } from "@/utils/supabase/server";
-import { revalidatePath } from "next/cache";
+import {getCurrentCampaign} from "@/server/services/campaigns";
+import {type Proposition} from "@/types/proposition";
+import {type ProposeAMovieResponse} from "@/types/responses";
+import {createClient} from "@/utils/supabase/server";
+import {revalidatePath} from "next/cache";
+import {type MovieDetails} from "tmdb-ts";
+import {getMovieDetails} from "@/server/services/tmdb";
 
 /**
  * Propose a movie.
@@ -115,9 +117,8 @@ export async function getCurrentPropositions(): Promise<Proposition[]> {
         .is("removed_at", null);
     
     if (propositionsError) {
-        return [] as Proposition[];
         console.error(propositionsError)
-        throw new Error(`Une erreur est survenue, merci de réessayer ultérieurement. ${ propositionsError?.message }`);
+        return [] as Proposition[];
     }
     
     return propositions as Proposition[];
@@ -142,24 +143,6 @@ export async function isMovieCurrentlyProposed(movie_id: number): Promise<boolea
 }
 
 /**
- * Fetch all movies ids that have been proposed.
- */
-export async function fetchProposedMoviesIds(): Promise<{ tmdb_id: number }[]> {
-    const supabase = await createClient();
-    
-    const {data, error} = await supabase
-        .from("suggestions")
-        .select("tmdb_id");
-    
-    if (error) {
-        console.error("Error fetching movies:", error);
-        return [];
-    }
-    
-    return data;
-}
-
-/**
  * Fetch all movies ids that have been shown.
  * Fetch only movies ids with non-null "shown_at".
  */
@@ -167,7 +150,7 @@ export async function fetchShownMoviesIds(): Promise<{ tmdb_id: number; shown_at
     const supabase = await createClient();
     
     const {data, error} = await supabase
-        .from("suggestions")
+        .from("movie_proposals")
         .select("tmdb_id,  shown_at")
         .not("shown_at", "is", null);
     
@@ -177,4 +160,43 @@ export async function fetchShownMoviesIds(): Promise<{ tmdb_id: number; shown_at
     }
     
     return data;
+}
+
+/**
+ * Fetch details of movies that have already been shown.
+ */
+export async function getShownMovies(): Promise<MovieDetails[]> {
+    const shownMovies = await fetchShownMoviesIds();
+
+    if (!shownMovies.length) return [];
+
+    try {
+        return await Promise.all(
+          shownMovies.map(({ tmdb_id }) => getMovieDetails(tmdb_id)),
+        );
+    } catch (err) {
+        console.error("Error fetching shown movie details from TMDB:", err);
+        return [];
+    }
+}
+
+/**
+ * Returns the propositions for the current user.
+ */
+export async function getPropositions(): Promise<Proposition[]> {
+    const supabase = await createClient()
+
+    const {data: propositions, error: propositionsError} = await supabase
+        .from("movie_proposals")
+        .select()
+        .is("shown_at", null);
+
+    console.log(propositions);
+
+    if (propositionsError) {
+        console.error(propositionsError)
+        return [] as Proposition[];
+    }
+
+    return propositions as Proposition[];
 }

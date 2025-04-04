@@ -9,14 +9,9 @@ import { toast } from "sonner";
 interface VoteButtonProps {
   movieId: number;
   initial: boolean;
-  numberOfVoteForFilm?: number;
 }
 
-export default function VoteButton({
-  movieId,
-  initial,
-  numberOfVoteForFilm,
-}: VoteButtonProps) {
+export default function VoteButton({ movieId, initial }: VoteButtonProps) {
   const [hasVoted, setHasVoted] = useState(initial);
   const [loading, setLoading] = useState(false);
 
