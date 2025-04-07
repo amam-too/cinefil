@@ -1,4 +1,4 @@
-import VoteButton from "@/components/customButtons/voteButton";
+import VoteButton from "@/components/customButtons/vote-button";
 import MovieRecommendations from "@/components/movie/movie-recommendations";
 import MovieRecommendationsSkeleton from "@/components/movie/movie-recommendations-skeleton";
 import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
@@ -76,7 +76,7 @@ export default async function MovieDetailPage({
               {/* Movie actions */}
               <div className="mt-8 space-y-6">
                 {movie.is_proposed ? (
-                  <VoteButton movieId={ movie.id } initial={ movie.userHasVoted }/>
+                  <VoteButton movieId={movie.id} initial={movie.userHasVoted} />
                 ) : (
                   <ProposeMovieManager movie={movie} />
                 )}

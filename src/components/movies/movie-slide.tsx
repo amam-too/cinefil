@@ -5,7 +5,7 @@ import React from "react";
 import Link from "next/link";
 import { type EnhancedMovie } from "@/server/services/movie";
 import ProposeMovieManager from "@/components/propositions/proposeMovieManager";
-import VoteButton from "@/components/customButtons/voteButton";
+import VoteButton from "@/components/customButtons/vote-button";
 import { getHumanReadableDate, getYearOnly } from "@/utils/date";
 
 interface MovieSlideProps {
