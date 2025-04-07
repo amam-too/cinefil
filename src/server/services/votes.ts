@@ -153,8 +153,8 @@ async function getNumberOfVotesForCurrentUser(user_id: string): Promise<number> 
     const supabase = await createClient()
     
     const {data: votes, error: votesError} = await supabase
-        .from("votes")
-        .select("*")
+        .from("movie_votes")
+        .select()
         .eq("user_id", user_id);
     
     if (votesError) {

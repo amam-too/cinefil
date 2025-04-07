@@ -1,7 +1,7 @@
 "use client";
 
-import DiscardOneMovieDialog from "@/components/propositions/discardOneMovieDialog";
-import ProposeButton from "@/components/propositions/propose-button";
+import DiscardOneMovieDialog from "@/components/propositions/discard-one-movie-dialog";
+import ProposeButton from "@/components/movie-actions/propose-button";
 import { type EnhancedMovie } from "@/server/services/movie";
 import {
   getCurrentPropositions,

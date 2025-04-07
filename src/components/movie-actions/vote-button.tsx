@@ -1,10 +1,10 @@
 "use client";
 
+import LoadingWheel from "@/components/ui/loading-wheel";
+import { Button } from "@/components/ui/button";
+import { deleteVoteForMovie, voteForMovie } from "@/server/services/votes";
 import React, { useCallback, useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import LoadingWheel from "@/components/loadingWheel";
-import { deleteVoteForMovie, voteForMovie } from "@/server/services/votes";
 
 interface VoteButtonProps {
   movieId: number;
