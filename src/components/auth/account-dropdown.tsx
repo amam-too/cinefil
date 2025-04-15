@@ -1,3 +1,4 @@
+import { isAdmin } from "@/app/login/actions";
 import AccountSignOutButton from "@/components/auth/account-sign-out-button";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {
@@ -20,6 +21,7 @@ export default async function AccountDropdown() {
     const supabase = await createClient();
     
     const {data: {user}} = (await supabase.auth.getUser()) as { data: { user: User | null } };
+    const isUserAdmin = await isAdmin();
 
     if (!user) {
         return <SignInButton />
@@ -34,8 +36,15 @@ export default async function AccountDropdown() {
                 </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-                <DropdownMenuLabel>{ user.user_metadata.name ?? "My account" }</DropdownMenuLabel>
+                {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
+                <DropdownMenuLabel>{ user.user_metadata.custom_claims.global_name ?? user.user_metadata.name ?? "My account" }</DropdownMenuLabel>
+                
                 <DropdownMenuSeparator/>
+                
+                { isUserAdmin ? (
+                    <p>Admin mode</p>
+                ) : null}
+                
                 <AccountSignOutButton/>
             </DropdownMenuContent>
         </DropdownMenu>
