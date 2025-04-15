@@ -22,7 +22,7 @@ export default function DiscardOneMovieDialog({open, setOpen, handleChoice, onCa
                 </DialogHeader>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full justify-items-center">
-                    <ToDiscardMovies handleChoice={ handleChoice }/>
+                    <ToDiscardMovies handleChoiceAction={ handleChoice }/>
                 </div>
                 
                 <DialogFooter className="flex w-full !justify-center items-center mt-6">
