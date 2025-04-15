@@ -14,6 +14,7 @@ interface Particle {
   age: number; // in ms.
   scale: number;
   opacity: number;
+  imgSrc: string;
 }
 
 interface PopcornExplosionLayoutProps {
@@ -23,6 +24,27 @@ interface PopcornExplosionLayoutProps {
 // Gravity (pixels per second squared)
 const GRAVITY = 800;
 
+/**
+ * Returns a random cinema-themed image URL.
+ */
+function getRandomParticleImage(): string {
+  const images: string[] = [
+    // Popcorn image;
+    "https://t4.ftcdn.net/jpg/05/38/38/49/360_F_538384940_FOTHmJDGjaGesuuzqTN3PpIFWk08r96A.png",
+    "https://preview.redd.it/6v2n5xa3xgk11.png?auto=webp&s=38993ac24ac9e92958e09f6141ec746dc71ef8b2",
+    // Popcorn emoji:
+    "https://em-content.zobj.net/thumbs/120/apple/325/popcorn_1f37f.png",
+    // Clapper board:
+    "https://i.pinimg.com/originals/56/19/b4/5619b454ce4b243274771295e074c3d5.png",
+    // Camera: (Not visible enough)
+    // "https://static.vecteezy.com/system/resources/previews/013/532/360/non_2x/cine-camera-transparent-free-png.png",
+    // Star emoji:
+    "https://em-content.zobj.net/thumbs/120/apple/325/star_2b50.png",
+  ];
+  const index = Math.floor(Math.random() * images.length);
+  return images[index] ?? images[0];
+}
+
 export default function PopcornExplosionLayout({
   children,
 }: PopcornExplosionLayoutProps) {
@@ -30,7 +52,7 @@ export default function PopcornExplosionLayout({
   const particleIdRef = useRef(0);
   const animationFrameRef = useRef<number>();
 
-  // Function to create an explosion at a given x,y (client coordinates)
+  // Function to create an explosion at given (x,y) (client coordinates)
   const createExplosion = (x: number, y: number) => {
     const numParticles = 30;
     const newParticles: Particle[] = [];
@@ -53,6 +75,7 @@ export default function PopcornExplosionLayout({
         age: 0,
         scale: 0.5 + Math.random() * 0.5,
         opacity: 1,
+        imgSrc: getRandomParticleImage(),
       };
       newParticles.push(particle);
     }
@@ -146,12 +169,8 @@ export default function PopcornExplosionLayout({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               key={p.id}
-              src={
-                "https://t4.ftcdn.net/jpg/05/38/38/49/360_F_538384940_FOTHmJDGjaGesuuzqTN3PpIFWk08r96A.png"
-              }
-              //https://preview.redd.it/6v2n5xa3xgk11.png?auto=webp&s=38993ac24ac9e92958e09f6141ec746dc71ef8b2
-              //src="https://em-content.zobj.net/thumbs/120/apple/325/popcorn_1f37f.png"
-              alt="Popcorn"
+              src={p.imgSrc}
+              alt="Cinema particle"
               style={style}
             />
           );
