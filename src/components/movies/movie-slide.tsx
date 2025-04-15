@@ -47,7 +47,7 @@ export default function MovieSlide({movie}: MovieSlideProps) {
     );
 }
 
-const CalendarBadge = (shown_at: { shown_at: string }) => (
+const CalendarBadge = ({shown_at}: { shown_at: string }) => (
     <div className="absolute top-5 right-5">
         { getHumanReadableDate(shown_at) }
     </div>
