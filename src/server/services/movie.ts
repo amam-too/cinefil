@@ -57,6 +57,11 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
     
     try {
         const movieDetails = await getMovieDetails(tmdbId);
+        
+        if (!movieDetails) {
+            throw new Error("Could not find movie details");
+        }
+        
         const movie = {
             id: movieDetails.id,
             tmdb_id: tmdbId,
@@ -94,9 +99,9 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
         ]);
         
         await Promise.all([
-            storeCast(credits.cast, tmdbId),
-            storeCrew(credits.crew, tmdbId),
-            storeRecommendations(recs.results, tmdbId)
+            storeCast(credits?.cast, tmdbId),
+            storeCrew(credits?.crew, tmdbId),
+            storeRecommendations(recs?.results, tmdbId)
         ]);
         
         const isProposed: boolean = await isMovieCurrentlyProposed(tmdbId)
@@ -104,11 +109,11 @@ export async function getEnhancedMovie(tmdbId: number, userId?: string): Promise
         return {
             ...movie,
             genres: movieDetails.genres ?? [],
-            cast: credits.cast ?? [],
-            crew: credits.crew ?? [],
-            director: credits.crew.find(person => person.job === "Director") ?? null,
-            writers: credits.crew.filter(person => ["Screenplay", "Writer", "Story"].includes(person.job)),
-            recommendations: recs.results ?? [],
+            cast: credits?.cast ?? [],
+            crew: credits?.crew ?? [],
+            director: credits?.crew.find(person => person.job === "Director") ?? null,
+            writers: credits?.crew.filter(person => ["Screenplay", "Writer", "Story"].includes(person.job)) ?? [],
+            recommendations: recs?.results ?? [],
             is_proposed: isProposed,
             userHasVoted: userVoted,
             voteCount: movieDetails.vote_count,
@@ -129,14 +134,14 @@ export async function getEnhancedMovies(
         concurrency?: number,
         ignoreErrors?: boolean
     } = {}
-): Promise<MovieDetails[]> {
+): Promise<EnhancedMovie[]> {
     const {
         concurrency = 4,
         ignoreErrors = false
     } = options;
     
     // Use Promise.all with a concurrency limit to fetch movies
-    const enhancedMovies: MovieDetails[] = [];
+    const enhancedMovies: EnhancedMovie[] = [];
     
     // Process movies in batches to control concurrency
     for (let i = 0; i < tmdbIds.length; i += concurrency) {
@@ -146,7 +151,7 @@ export async function getEnhancedMovies(
         const batchResults = await Promise.all(
             batch.map(async (tmdbId) => {
                 try {
-                    return await getMovieDetails(tmdbId);
+                    return await getEnhancedMovie(tmdbId);
                 } catch (error) {
                     if (ignoreErrors) {
                         console.warn(`Failed to fetch movie with TMDB ID ${ tmdbId }:`, error);
@@ -158,7 +163,7 @@ export async function getEnhancedMovies(
         );
         
         // Filter out null results if ignoreErrors is true
-        const validResults = batchResults.filter((movie): movie is MovieDetails => movie !== null);
+        const validResults = batchResults.filter((movie): movie is EnhancedMovie => movie !== null);
         enhancedMovies.push(...validResults);
     }
     
@@ -200,7 +205,7 @@ async function storeProductionCompanies(movieId: number, companies?: { id: numbe
         .throwOnError();
 }
 
-async function storeCast(cast: Cast[], movieId: number) {
+async function storeCast(cast: Cast[] | undefined, movieId: number) {
     if (!cast || cast.length === 0) return;
     const supabase = await createClient();
     
@@ -224,7 +229,7 @@ async function storeCast(cast: Cast[], movieId: number) {
         .throwOnError();
 }
 
-async function storeCrew(crew: Crew[], movieId: number) {
+async function storeCrew(crew: Crew[] | undefined, movieId: number) {
     if (!crew || crew.length === 0) return;
     const supabase = await createClient();
     await supabase.from("crew_members").upsert(crew.map(crew_member => ({
@@ -237,7 +242,7 @@ async function storeCrew(crew: Crew[], movieId: number) {
     await supabase.from("movie_crew").upsert(crew.slice(0, 4).map(({id, department, job}) => ({movie_id: movieId, crew_id: id, department, job})), {onConflict: "movie_id,crew_id", ignoreDuplicates: true}).throwOnError();
 }
 
-async function storeRecommendations(recommendations: Recommendation[], movieId: number) {
+async function storeRecommendations(recommendations: Recommendation[] | undefined, movieId: number) {
     if (!recommendations || recommendations.length === 0) return;
     const supabase = await createClient();
     

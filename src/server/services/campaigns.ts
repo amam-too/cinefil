@@ -19,16 +19,29 @@ export interface Campaign {
 export async function getCurrentCampaign(): Promise<Campaign> {
     const supabase = await createClient();
     
+    const now = new Date().toISOString();
+    
     const {data: campaignData, error: campaignError} = await supabase
         .from("campaigns")
         .select()
-        .lte("start_date", new Date().toISOString())
-        .order("start_date")
-        .single()
+        .lte("start_date", now)
+        .order("start_date", {ascending: false})
+        .limit(1);
     
-    if (!campaignData || campaignError) {
-        throw new Error(campaignError?.message ?? "No campaign was found.");
+    if (!campaignData) {
+        throw new Error("Campaign not found.");
     }
     
-    return campaignData as Campaign;
+    const data = campaignData[0]
+    
+    if (!data) {
+        console.error("No campaign data found.");
+        throw new Error("Campaign not found.");
+    }
+    
+    if (campaignError) {
+        throw new Error("Could not get campaign");
+    }
+    
+    return data as Campaign;
 }

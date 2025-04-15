@@ -1,12 +1,11 @@
 "use server"
 
 import { getCurrentCampaign } from "@/server/services/campaigns";
-import { EnhancedMovie, getEnhancedMovies } from "@/server/services/movie";
+import { type EnhancedMovie, getEnhancedMovies } from "@/server/services/movie";
 import { type Proposition } from "@/types/proposition";
 import { type ProposeAMovieResponse } from "@/types/responses";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
-import { MovieDetails } from "tmdb-ts";
 
 /**
  * Propose a movie.
@@ -33,6 +32,10 @@ export async function proposeMovie(tmdb_id: number): Promise<ProposeAMovieRespon
     const user_id = userData.user.id;
     
     const currentCampagin = await getCurrentCampaign();
+    
+    if (!currentCampagin) {
+        throw new Error("There is currently no campaign.")
+    }
     
     const {error} = await supabase
         .from("movie_proposals")
@@ -152,10 +155,10 @@ export async function fetchShownMoviesIds(): Promise<{ movie_id: number; shown_a
     const {data, error} = await supabase
         .from("movie_proposals")
         .select("movie_id,  shown_at")
-        .not("shown_at", "is", null);
+        .lt("shown_at", new Date().toISOString());
     
     if (error) {
-        console.error("Error fetching shown movies:", error);
+        console.error("Error fetching shown movies:", error.message);
         return [];
     }
     
@@ -165,7 +168,7 @@ export async function fetchShownMoviesIds(): Promise<{ movie_id: number; shown_a
 /**
  * Fetch details of movies that have already been shown.
  */
-export async function getShownMovies(): Promise<MovieDetails[]> {
+export async function getShownMovies(): Promise<EnhancedMovie[]> {
     const shownMovies = await fetchShownMoviesIds();
     
     if (!shownMovies.length) return [];
@@ -188,8 +191,6 @@ export async function getPropositions(): Promise<Proposition[]> {
         .from("movie_proposals")
         .select()
         .is("shown_at", null);
-    
-    console.log(propositions);
     
     if (propositionsError) {
         console.error(propositionsError)

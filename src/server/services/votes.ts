@@ -94,7 +94,6 @@ export async function getMoviesVotedByUser(): Promise<Vote[]> {
     
     if (sessionError || !session) {
         return [] as Vote[]
-        // throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
     }
     
     const currentCampaign = await getCurrentCampaign();
