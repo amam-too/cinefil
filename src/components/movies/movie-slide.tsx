@@ -1,4 +1,3 @@
-// MovieSlide.tsx
 "use client";
 
 import VoteButton from "@/components/movie-actions/vote-button";

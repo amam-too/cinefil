@@ -18,14 +18,14 @@ import { Suspense } from "react";
 export default async function MovieDetailPage({params}: { params: Promise<{ id: string }> }) {
     const {id} = await params
     const movie = await getEnhancedMovie(Number.parseInt(id))
-    
+
     if (!movie) {
         notFound()
     }
-    
+
     // Format runtime to hours and minutes
     const runtime = movie.runtime ? `${ Math.floor(movie.runtime / 60) }h ${ movie.runtime % 60 }m` : ""
-    
+
     return (
         <main className="relative min-h-screen">
             {/* Blurred backdrop gradient */ }
@@ -43,7 +43,7 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                 ) }
                 <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-black/95 backdrop-blur-xl"/>
             </div>
-            
+
             <div className="relative z-10 container max-w-6xl mx-auto px-4 py-12 pt-32">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                     {/* Left column - Movie poster and actions */ }
@@ -64,15 +64,15 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                                     </div>
                                 ) }
                             </div>
-                            
+
                             {/* Movie actions */ }
                             <div className="mt-8 space-y-6">
                                 { movie.is_proposed ? (
-                                    <VoteButton movieId={ movie.id } initial={ movie.userHasVoted }/>
+                                    <VoteButton movieId={movie.id} initial={movie.userHasVoted} />
                                 ) : (
                                     <ProposeMovieManager movie={ movie }/>
                                 ) }
-                                
+
                                 {/* External links */ }
                                 <div className="pt-2">
                                     <Button
@@ -94,43 +94,43 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                             </div>
                         </div>
                     </div>
-                    
+
                     {/* Right column - Movie details */ }
                     <div className="md:col-span-2 text-white">
                         <div className="space-y-2">
                             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">{ movie.title }</h1>
-                            
+
                             { movie.original_title !== movie.title && (
                                 <h2 className="text-xl text-gray-300">{ movie.original_title }</h2>
                             ) }
-                            
+
                             {/* Tagline */ }
                             { movie.tagline && <p className="text-xl italic text-gray-400 pt-1">{ movie.tagline }</p> }
                         </div>
-                        
+
                         <div className="flex flex-wrap items-center gap-6 mt-6 text-gray-300">
                             <div className="flex items-center">
                                 <Calendar className="w-4 h-4 mr-2"/>
                                 <span>{ format(new Date(movie.release_date), "yyyy") }</span>
                             </div>
-                            
+
                             { runtime && (
                                 <div className="flex items-center">
                                     <Clock className="w-4 h-4 mr-2"/>
                                     <span>{ runtime }</span>
                                 </div>
                             ) }
-                            
+
                             <div className="flex items-center">
                                 <Star className="w-4 h-4 mr-2 text-yellow-400 fill-yellow-400"/>
                                 <span>{ movie.vote_average.toFixed(1) } ({ movie.vote_count } votes)</span>
                             </div>
-                            
+
                             <div className="flex items-center">
                                 <CountryFlagBadge code={ movie.original_language }/>
                             </div>
                         </div>
-                        
+
                         {/* Genres */ }
                         <div className="flex flex-wrap gap-2 mt-6">
                             { movie.genres?.map((genre) => (
@@ -141,21 +141,21 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                                 </Link>
                             )) }
                         </div>
-                        
+
                         <Separator className="my-8 bg-white/10"/>
-                        
+
                         {/* Overview */ }
                         <div className="space-y-3">
                             <h3 className="text-2xl font-medium">Résumé</h3>
                             <p className="text-gray-300 leading-relaxed text-lg">{ movie.overview }</p>
                         </div>
-                        
+
                         <Separator className="my-8 bg-white/10"/>
-                        
+
                         {/* Cast and Crew */ }
                         <div className="space-y-8">
                             <h3 className="text-2xl font-medium">Acteurs et équipe</h3>
-                            
+
                             {/* Director */ }
                             { movie.director && (
                                 <div>
@@ -182,7 +182,7 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                                     </div>
                                 </div>
                             ) }
-                            
+
                             {/* Cast */ }
                             <div>
                                 <div className="flex items-center justify-between mb-4">
@@ -191,7 +191,7 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                                         <Link href={ `https://www.themoviedb.org/movie/${ movie.id }/cast` } target="_blank">Tout voir</Link>
                                     </Button>
                                 </div>
-                                
+
                                 <div className="overflow-x-auto pb-2 -mx-4 px-4">
                                     <div className="flex space-x-4" style={ {minWidth: "max-content"} }>
                                         { movie.cast ? movie.cast.slice(0, 6).map((person) => (
@@ -226,12 +226,12 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                                 </div>
                             </div>
                         </div>
-                        
+
                         {/* Production companies */ }
                         { movie.production_companies && movie.production_companies.length > 0 && (
                             <>
                                 <Separator className="my-8 bg-white/10"/>
-                                
+
                                 <div>
                                     <h3 className="text-lg font-medium mb-4 text-gray-200">Production</h3>
                                     <div className="flex flex-wrap gap-3">
@@ -244,12 +244,12 @@ export default async function MovieDetailPage({params}: { params: Promise<{ id: 
                                 </div>
                             </>
                         ) }
-                        
+
                         {/* Recommendations */ }
                         { movie.recommendations && movie.recommendations.length > 0 && (
                             <>
                                 <Separator className="my-8 bg-white/10"/>
-                                
+
                                 <div>
                                     <h3 className="text-2xl font-medium mb-6">Films similaires</h3>
                                     <Suspense fallback={ <MovieRecommendationsSkeleton/> }>
