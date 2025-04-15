@@ -1,11 +1,14 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
-import { type Provider, type User } from "@supabase/auth-js";
-import { jwtDecode } from "jwt-decode";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import {createClient} from "@/utils/supabase/server";
+import {type Provider, type User} from "@supabase/auth-js";
+import {jwtDecode} from "jwt-decode";
+import {revalidatePath} from "next/cache";
+import {redirect} from "next/navigation";
 
+/**
+ * TODO DOC
+ */
 export async function login(provider: Provider) {
     const supabase = await createClient();
     
@@ -25,6 +28,9 @@ export async function login(provider: Provider) {
     }
 }
 
+/**
+ * TODO DOC
+ */
 export async function signOut() {
     const supabase = await createClient();
     
@@ -38,23 +44,27 @@ export async function signOut() {
     redirect("/");
 }
 
-export async function getUser(): Promise<User | null> {
-    const supabase = await createClient();
-    
-    const {data: userData, error: userError} = await supabase.auth.getUser();
-    
-    if (userError) {
-        console.error("Error fetching user:", userError);
-        return null;
-    }
-    
-    return userData.user;
+/**
+ * TODO DOC
+ */
+export async function getUser(): Promise<User> {
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  if (!userData.user?.id || userError) {
+    throw new Error("User not authenticated");
+  }
+
+  return userData.user;
 }
 
 type UserAccessToken = {
     user_role?: "USER" | "ADMIN";
 }
 
+/**
+ * TODO DOC
+ */
 export async function isAdmin(): Promise<boolean> {
     const supabase = await createClient();
     

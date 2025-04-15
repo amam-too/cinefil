@@ -10,6 +10,8 @@ import {
 } from "@/server/services/propositions";
 import React, { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { type Proposition } from "@/types/proposition";
+import { login } from "@/app/login/actions";
 
 interface ProposeMovieManagerProps {
   movie: EnhancedMovie;
@@ -27,7 +29,20 @@ export default function ProposeMovieManager({
    */
   const handleProposeMovie = (movie: EnhancedMovie) => {
     startTransition(async () => {
-      const currentPropositions = await getCurrentPropositions();
+      let currentPropositions: Proposition[] = [];
+
+      try {
+        currentPropositions = await getCurrentPropositions();
+      } catch (error: any) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.message === "User not authenticated") {
+          await login("discord");
+          return;
+        } else {
+          toast.error("Erreur lors de la récupération des propositions.");
+          return;
+        }
+      }
 
       if (currentPropositions.length >= 3) {
         setPendingMovie(movie);
@@ -37,9 +52,7 @@ export default function ProposeMovieManager({
 
       toast.promise(proposeMovie(movie.id), {
         loading: "On enregistre...",
-        success: (response) => {
-          return response.message;
-        },
+        success: (response) => response.message,
         error: (error: Error) => error.message ?? "Une erreur est survenue.",
       });
     });

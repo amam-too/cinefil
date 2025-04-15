@@ -1,11 +1,11 @@
 "use server"
 
-import { getCurrentCampaign } from "@/server/services/campaigns";
-import { type EnhancedMovie, getEnhancedMovies } from "@/server/services/movie";
-import { type Proposition } from "@/types/proposition";
-import { type ProposeAMovieResponse } from "@/types/responses";
-import { createClient } from "@/utils/supabase/server";
-import { revalidatePath } from "next/cache";
+import {getCurrentCampaign} from "@/server/services/campaigns";
+import {type EnhancedMovie, getEnhancedMovies} from "@/server/services/movie";
+import {type Proposition} from "@/types/proposition";
+import {type ProposeAMovieResponse} from "@/types/responses";
+import {createClient} from "@/utils/supabase/server";
+import {revalidatePath} from "next/cache";
 
 /**
  * Propose a movie.
@@ -81,6 +81,11 @@ export async function removeProposition(tmdb_id: number): Promise<ProposeAMovieR
     }
 }
 
+/**
+ * TODO DOC
+ * @param tmdb_id
+ * @param campaign_id
+ */
 export async function getPropositionById(tmdb_id: string, campaign_id: string): Promise<Proposition> {
     const supabase = await createClient()
     
@@ -103,12 +108,10 @@ export async function getPropositionById(tmdb_id: string, campaign_id: string): 
  */
 export async function getCurrentPropositions(): Promise<Proposition[]> {
     const supabase = await createClient()
-    
     const {data: userData, error: userError} = await supabase.auth.getUser();
     
     if (!userData.user?.id || userError) {
-        return [] as Proposition[];
-        // throw new Error(userError?.message ?? "User not found.");
+        throw new Error("User not authenticated");
     }
     
     const user_id = userData.user.id;
@@ -120,13 +123,17 @@ export async function getCurrentPropositions(): Promise<Proposition[]> {
         .is("shown_at", null);
     
     if (propositionsError) {
-        console.error(propositionsError)
-        return [] as Proposition[];
+        console.error(propositionsError);
+        throw new Error("Failed to fetch propositions");
     }
     
     return propositions as Proposition[];
 }
 
+/**
+ * TODO DOC
+ * @param movie_id
+ */
 export async function isMovieCurrentlyProposed(movie_id: number): Promise<boolean> {
     const supabase = await createClient()
     
