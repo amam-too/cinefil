@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { type Metadata } from "next";
 import React, { type ReactNode } from "react";
 import Footer from "@/components/footer";
+import PopcornExplosionLayout from "@/utils/popcorn-explosion-layout";
 
 export const metadata: Metadata = {
   title: "cinéfil",
@@ -17,9 +18,12 @@ export default async function RootLayout({
     <html lang="fr" className="dark">
       <body className="m-0 bg-background p-0 font-sans text-white">
         <Navbar />
-        <main className="relative z-10 w-full bg-background pb-10 shadow-2xl">
-          {children}
-        </main>
+
+        <PopcornExplosionLayout>
+          <main className="relative z-10 w-full bg-background pb-10 shadow-2xl">
+            {children}
+          </main>
+        </PopcornExplosionLayout>
         <Footer />
         <Toaster />
       </body>
