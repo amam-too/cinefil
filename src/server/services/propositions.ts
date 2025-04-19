@@ -63,16 +63,24 @@ export async function proposeMovie(tmdb_id: number): Promise<ProposeAMovieRespon
  */
 export async function removeProposition(tmdb_id: number): Promise<ProposeAMovieResponse> {
     const supabase = await createClient()
-    
+
+    const {data: session, error: sessionError} = await supabase.auth.getUser();
+
+    if (sessionError || !session) {
+        throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
+    }
+
     const {error} = await supabase
         .from("movie_proposals")
         .delete()
         .eq("movie_id", tmdb_id)
+        .eq("proposed_by", session.user.id)
     
     if (error) {
         throw new Error("Une erreur est survenue, merci de réessayer ultérieurement. La proposition n'a pas été supprimée.");
     }
-    
+
+    // TODO : Why ?
     revalidatePath("/");
     
     return {
