@@ -60,7 +60,6 @@
 }
 
 
-
 @layer base {
   * {
     @apply border-border;
@@ -68,4 +67,14 @@
   body {
     @apply bg-background text-foreground;
     }
+}
+
+/* Hide scrollbars but allow scrolling */
+.scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
 }
