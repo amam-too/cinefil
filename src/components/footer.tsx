@@ -4,7 +4,7 @@ import tmdb_logo from "@/public/tmdb_attribution.svg";
 export default function Footer() {
   return (
     <footer className="sticky bottom-0 z-0 bg-secondary px-4 py-8">
-      <div className="flex w-full flex-col items-center justify-center gap-12 sm:flex-row sm:justify-between">
+      <div className="flex w-full flex-col items-center justify-center gap-12 sm:flex-row">
         {/* TMDb Attribution */}
         <div className="flex flex-col items-center sm:items-start">
           <p className="mb-2 text-center text-sm text-gray-300 sm:text-left">
