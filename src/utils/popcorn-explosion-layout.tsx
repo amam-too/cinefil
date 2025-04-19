@@ -42,7 +42,7 @@ function getRandomParticleImage(): string {
     "https://em-content.zobj.net/thumbs/120/apple/325/star_2b50.png",
   ];
   const index = Math.floor(Math.random() * images.length);
-  return images[index] ?? images[0];
+  return images[index] ?? images[0] ?? "";
 }
 
 export default function PopcornExplosionLayout({
