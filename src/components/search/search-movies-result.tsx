@@ -1,22 +1,39 @@
 import MovieCard from "@/components/search/search-movie-card";
 import { searchMovies } from "@/server/services/tmdb";
 import SearchNoQuery from "@/components/search/search-no-query";
+import { type AvailableLanguage } from "tmdb-ts";
 
 interface SearchMoviesResultProps {
   query?: string;
+  year?: string;
+  language?: string;
 }
 
 export default async function SearchMoviesResult({
   query,
+  year,
+  language,
 }: SearchMoviesResultProps) {
-  if (!query) {
-    return <SearchNoQuery />;
-  }
+  if (!query) return <SearchNoQuery />;
 
-  const movies = await searchMovies(query);
+  const yearNum = year ? parseInt(year) : undefined;
 
-  if (!movies?.results) {
-    return <p>No results</p>;
+  const movies = await searchMovies({
+    query,
+    year: yearNum,
+    language: language as AvailableLanguage,
+  });
+
+  if (!movies?.results || movies.results.length === 0) {
+    return (
+      <div className="mt-10 text-center text-lg text-gray-400">
+        <p className="mb-2 text-3xl">😢</p>
+        <p>No movies matched your search.</p>
+        <p className="text-sm text-muted-foreground">
+          Try a different title, year, or language.
+        </p>
+      </div>
+    );
   }
 
   return (

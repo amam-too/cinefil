@@ -9,6 +9,7 @@ import {
   type Search,
   TMDB,
 } from "tmdb-ts";
+import { type MovieSearchOptions } from "tmdb-ts/dist/endpoints";
 
 const tmdb = new TMDB(process.env.TMDB_API_TOKEN!);
 const rateLimiter = new RateLimiterMemory({
@@ -33,11 +34,11 @@ const handleRateLimit = async (key: string | number) => {
  * @param query
  */
 export const searchMovies = async (
-  query: string,
+  query: MovieSearchOptions,
 ): Promise<Search<Movie> | null> => {
-  await handleRateLimit(query);
+  await handleRateLimit(query.query);
   try {
-    return await tmdb.search.movies({ query, include_adult: false });
+    return await tmdb.search.movies({ ...query, include_adult: false });
   } catch (err) {
     console.error("Error fetching movies:", err);
     return null;

@@ -166,11 +166,13 @@ export async function isMovieCurrentlyProposed(movie_id: number): Promise<boolea
  */
 export async function fetchShownMoviesIds(): Promise<{ movie_id: number; shown_at: string }[]> {
     const supabase = await createClient();
-    
-    const {data, error} = await supabase
+
+    const { data, error } = await supabase
         .from("movie_proposals")
-        .select("movie_id,  shown_at")
-        .lt("shown_at", new Date().toISOString());
+        .select("movie_id, shown_at")
+        .not("shown_at", "is", null)
+        .lt("shown_at", new Date().toISOString())
+        .order("shown_at", { ascending: false });
     
     if (error) {
         console.error("Error fetching shown movies:", error.message);
