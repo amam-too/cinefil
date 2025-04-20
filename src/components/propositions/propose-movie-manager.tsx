@@ -32,7 +32,7 @@ export default function ProposeMovieManager({
   const propositionHasVotes: boolean = (movie.cinefil_votes_count ?? 0) > 0;
 
   const buttonText = propositionHasVotes
-    ? "🔒 Déjà soutenue"
+    ? "🔒 Proposition soutenue"
     : hasProposed
       ? "🗑️ Retirer la proposition"
       : "🎬 Proposer le film";
