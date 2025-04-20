@@ -8,7 +8,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { type Option } from "@/components/ui/multi-select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -18,9 +17,12 @@ import { z } from "zod";
 
 export const searchSchema = z.object({
   query: z.string().optional(),
-  genres: z.array(z.custom<Option>()).optional(),
-  year: z.string().optional(),
-  language: z.string().optional(),
+  year: z
+    .string()
+    .optional()
+    .refine((val) => !val || (parseInt(val) >= 1900 && parseInt(val) <= 2025), {
+      message: "Year must be between 1900 and 2025",
+    }),
 });
 
 export default function SearchInputs() {
@@ -31,13 +33,7 @@ export default function SearchInputs() {
     resolver: zodResolver(searchSchema),
     defaultValues: {
       query: searchParams.get("query") ?? "",
-      genres:
-        searchParams
-          .get("genres")
-          ?.split(",")
-          .map((g) => ({ value: g, label: g })) ?? [],
       year: searchParams.get("year") ?? "",
-      language: searchParams.get("language") ?? "",
     },
   });
 
@@ -45,16 +41,11 @@ export default function SearchInputs() {
 
   useEffect(() => {
     const currentQuery = searchParams.get("query") ?? "";
-    const currentGenres = searchParams.get("genres")?.split(",") ?? [];
     const currentYear = searchParams.get("year") ?? "";
-    const currentLanguage = searchParams.get("language") ?? "";
 
     if (
       debouncedValues.query !== currentQuery ||
-      JSON.stringify(debouncedValues.genres?.map((g) => g.value)) !==
-        JSON.stringify(currentGenres) ||
-      debouncedValues.year !== currentYear ||
-      debouncedValues.language !== currentLanguage
+      debouncedValues.year !== currentYear
     ) {
       saveInURL(debouncedValues);
     }
@@ -73,22 +64,10 @@ export default function SearchInputs() {
       params.delete("query");
     }
 
-    if (values.genres && values.genres.length > 0) {
-      params.set("genres", values.genres.map((g) => g.value).join(","));
-    } else {
-      params.delete("genres");
-    }
-
     if (values.year) {
       params.set("year", values.year);
     } else {
       params.delete("year");
-    }
-
-    if (values.language) {
-      params.set("language", values.language);
-    } else {
-      params.delete("language");
     }
 
     router.replace(`/search?${params.toString()}`);
@@ -126,21 +105,11 @@ export default function SearchInputs() {
           render={({ field }) => (
             <FormItem className="w-full md:w-1/6">
               <FormControl>
-                <Input type="number" placeholder="Year" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="language"
-          render={({ field }) => (
-            <FormItem className="w-full md:w-1/6">
-              <FormControl>
                 <Input
-                  type="text"
-                  placeholder="Language (e.g. en, fr)"
+                  type="number"
+                  placeholder="Year"
+                  min={1900}
+                  max={2025}
                   {...field}
                 />
               </FormControl>
