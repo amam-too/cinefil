@@ -10,6 +10,7 @@ export default async function HomeGreeting() {
     return (
       <h1 className={`${gloock.className} text-5xl`}>
         Bienvenue{" "}
+        {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
         {user.user_metadata.custom_claims.global_name ??
           user.user_metadata.name ??
           ""}{" "}

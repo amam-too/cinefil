@@ -94,7 +94,7 @@ export default function ProposeMovieManager({
       error: (err: Error) =>
         err.message ?? "Erreur lors du retrait de la proposition.",
     });
-  }, [movie.id]);
+  }, [movie.id, propositionHasVotes]);
 
   /**
    *

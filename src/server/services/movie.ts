@@ -147,6 +147,12 @@ export async function getEnhancedMovie(
       lastUpdated: movie.last_updated,
       genre_ids: movieDetails.genres.map((genre) => genre.id),
       production_companies: movieDetails.production_companies ?? [],
+      cinefil_votes_count: 0,
+      movie_proposal_id: 0,
+      proposedAt: "",
+      proposed_by: "",
+      shown_at: "",
+      user_has_voted: false,
     };
   } catch (err) {
     console.error(`Error fetching movie ${tmdbId}:`, err);

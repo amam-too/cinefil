@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useDebounce } from "use-debounce";
 import { z } from "zod";
@@ -39,6 +39,31 @@ export default function SearchInputs() {
 
   const [debouncedValues] = useDebounce(form.watch(), 500);
 
+  /**
+   *
+   * @param values
+   */
+  const saveInURL = useCallback(
+    (values: z.infer<typeof searchSchema>) => {
+      const params = new URLSearchParams();
+
+      if (values.query) {
+        params.set("query", values.query);
+      } else {
+        params.delete("query");
+      }
+
+      if (values.year) {
+        params.set("year", values.year);
+      } else {
+        params.delete("year");
+      }
+
+      router.replace(`/search?${params.toString()}`);
+    },
+    [router],
+  );
+
   useEffect(() => {
     const currentQuery = searchParams.get("query") ?? "";
     const currentYear = searchParams.get("year") ?? "";
@@ -49,29 +74,7 @@ export default function SearchInputs() {
     ) {
       saveInURL(debouncedValues);
     }
-  }, [debouncedValues, searchParams]);
-
-  /**
-   *
-   * @param values
-   */
-  function saveInURL(values: z.infer<typeof searchSchema>) {
-    const params = new URLSearchParams();
-
-    if (values.query) {
-      params.set("query", values.query);
-    } else {
-      params.delete("query");
-    }
-
-    if (values.year) {
-      params.set("year", values.year);
-    } else {
-      params.delete("year");
-    }
-
-    router.replace(`/search?${params.toString()}`);
-  }
+  }, [debouncedValues, saveInURL, searchParams]);
 
   /**
    *

@@ -14,6 +14,7 @@ export default function MovieSlide({ movie, userId }: MovieSlideProps) {
     <div className="embla__slide w-64 flex-shrink-0 px-2">
       <Link href={`/movie/${movie.id}`}>
         <div className="group relative cursor-pointer">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
             alt={movie.title}
