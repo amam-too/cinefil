@@ -48,7 +48,7 @@ export default function ProposeMovieManager({
         currentPropositions = await getCurrentUserPropositions();
       } catch (error: any) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (error.message === "User not authenticated") {
+        if (error.message === "User not authenticated.") {
           await login("discord");
           return;
         }
