@@ -13,7 +13,7 @@ import {revalidatePath} from "next/cache";
  */
 export async function proposeMovie(tmdb_id: number): Promise<ProposeAMovieResponse> {
     const supabase = await createClient();
-    const currentPropositions = await getCurrentPropositions();
+    const currentPropositions = await getCurrentUserPropositions();
     
     if (currentPropositions.length >= 3) {
         return {
@@ -26,14 +26,14 @@ export async function proposeMovie(tmdb_id: number): Promise<ProposeAMovieRespon
     const {data: userData, error: userError} = await supabase.auth.getUser();
     
     if (!userData.user?.id || userError) {
-        throw new Error(userError?.message ?? "User not found.");
+        throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
     }
     
     const user_id = userData.user.id;
+
+    const currentCampaign = await getCurrentCampaign();
     
-    const currentCampagin = await getCurrentCampaign();
-    
-    if (!currentCampagin) {
+    if (!currentCampaign) {
         throw new Error("There is currently no campaign.")
     }
     
@@ -42,15 +42,15 @@ export async function proposeMovie(tmdb_id: number): Promise<ProposeAMovieRespon
         .insert({
             movie_id: tmdb_id,
             proposed_by: user_id,
-            campaign_id: currentCampagin.id
+            campaign_id: currentCampaign.id
         });
     
     if (error) {
-        console.error(error);
         throw new Error("Une erreur est survenue, merci de réessayer ultérieurement. La proposition n'a pas été prise en compte.");
     }
     
     revalidatePath("/");
+
     return {
         success: true,
         message: "Proposition enregistrée !"
@@ -80,7 +80,6 @@ export async function removeProposition(tmdb_id: number): Promise<ProposeAMovieR
         throw new Error("Une erreur est survenue, merci de réessayer ultérieurement. La proposition n'a pas été supprimée.");
     }
 
-    // TODO : Why ?
     revalidatePath("/");
     
     return {
@@ -91,35 +90,35 @@ export async function removeProposition(tmdb_id: number): Promise<ProposeAMovieR
 
 /**
  * TODO DOC
- * @param tmdb_id
+ * @param proposition_id
  * @param campaign_id
  */
-export async function getPropositionById(tmdb_id: string, campaign_id: string): Promise<Proposition> {
+export async function getPropositionById(proposition_id: number, campaign_id: number): Promise<Proposition> {
     const supabase = await createClient()
-    
+
     const {data, error} = await supabase
         .from("movie_proposals")
         .select()
-        .eq("movie_id", tmdb_id)
+        .eq("id", proposition_id)
         .eq("campaign_id", campaign_id)
         .single();
-    
+
     if (error || !data) {
         throw new Error("Le film n'est pas proposé dans la campagne actuelle.");
     }
-    
+
     return data as Proposition;
 }
 
 /**
  * Returns the propositions for the current user.
  */
-export async function getCurrentPropositions(): Promise<Proposition[]> {
+export async function getCurrentUserPropositions(): Promise<Proposition[]> {
     const supabase = await createClient()
     const {data: userData, error: userError} = await supabase.auth.getUser();
     
     if (!userData.user?.id || userError) {
-        throw new Error("User not authenticated");
+        throw new Error("User not authenticated.");
     }
     
     const user_id = userData.user.id;
@@ -132,32 +131,10 @@ export async function getCurrentPropositions(): Promise<Proposition[]> {
     
     if (propositionsError) {
         console.error(propositionsError);
-        throw new Error("Failed to fetch propositions");
+        throw new Error("Failed to fetch propositions for current user.");
     }
     
     return propositions as Proposition[];
-}
-
-/**
- * TODO DOC
- * @param movie_id
- */
-export async function isMovieCurrentlyProposed(movie_id: number): Promise<boolean> {
-    const supabase = await createClient()
-    
-    const {data, error} = await supabase
-        .from("enhanced_movies")
-        .select()
-        .eq("tmdb_id", movie_id)
-        .is("is_proposed", null)
-        .limit(1);
-    
-    if (error) {
-        console.error(`Une erreur est survenue lors de la vérification de la proposition du film :`, error.message);
-        throw new Error(error.message ?? "Échec de la vérification du statut de proposition du film.");
-    }
-    
-    return !!data?.length;
 }
 
 /**
@@ -173,7 +150,7 @@ export async function fetchShownMoviesIds(): Promise<{ movie_id: number; shown_a
         .not("shown_at", "is", null)
         .lt("shown_at", new Date().toISOString())
         .order("shown_at", { ascending: false });
-    
+
     if (error) {
         console.error("Error fetching shown movies:", error.message);
         return [];
@@ -199,20 +176,28 @@ export async function getShownMovies(): Promise<EnhancedMovie[]> {
 }
 
 /**
- * Returns the propositions for the current user.
+ * Returns the propositions, shuffled randomly.
  */
 export async function getPropositions(): Promise<Proposition[]> {
-    const supabase = await createClient()
-    
-    const {data: propositions, error: propositionsError} = await supabase
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
         .from("movie_proposals")
         .select()
         .is("shown_at", null);
-    
-    if (propositionsError) {
-        console.error(propositionsError)
-        return [] as Proposition[];
+
+    if (error || !data) {
+        console.error(error);
+        return [];
     }
-    
-    return propositions as Proposition[];
+
+    const shuffled = [...data];
+
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    return shuffled as Proposition[];
 }
+

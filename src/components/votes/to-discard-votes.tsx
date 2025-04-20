@@ -2,42 +2,47 @@
 
 import { Button } from "@/components/ui/button";
 import { type EnhancedMovie, getEnhancedMovies } from "@/server/services/movie";
-import { getCurrentUserPropositions } from "@/server/services/propositions";
-import { type Proposition } from "@/types/proposition";
 import { getYearOnly } from "@/utils/date";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DiscardMoviesSkeleton } from "@/components/movies/discard-movies-skeleton";
+import { getCurrentVotes } from "@/server/services/votes";
+import { type Vote } from "@/types/vote";
+import { getPropositionById } from "@/server/services/propositions";
 
 interface ToDiscardMoviesProps {
   handleChoiceAction: (tmdb_id: number) => void;
 }
 
-export function ToDiscardMovies({ handleChoiceAction }: ToDiscardMoviesProps) {
+export function ToDiscardVotes({ handleChoiceAction }: ToDiscardMoviesProps) {
   const [movies, setMovies] = useState<EnhancedMovie[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const propositions: Proposition[] = await getCurrentUserPropositions();
+        const votes: Vote[] = await getCurrentVotes();
 
-        if (!propositions) {
-          return;
-        }
+        if (!votes) return;
 
-        const movieDetails = await getEnhancedMovies(
-          propositions.map((movie) => movie.movie_id),
+        const movieIds = await Promise.all(
+          votes.map(async (vote) => {
+            const proposition = await getPropositionById(
+              vote.movie_proposal_id,
+              vote.campaign_id,
+            );
+            return proposition.movie_id;
+          }),
         );
 
-        if (!movieDetails) {
-          return;
-        }
+        const movieDetails = await getEnhancedMovies(movieIds);
+
+        if (!movieDetails) return;
 
         setMovies(movieDetails);
       } catch {
         toast.error(
-          "Une erreur est survenue lors de la récupération des propositions.",
+          "Une erreur est survenue lors de la récupération des votes.",
         );
       } finally {
         setLoading(false);
@@ -75,7 +80,7 @@ export function ToDiscardMovies({ handleChoiceAction }: ToDiscardMoviesProps) {
       </div>
       <Button
         variant="destructive"
-        onClick={() => handleChoiceAction(movie.id)}
+        onClick={() => handleChoiceAction(movie.movie_proposal_id)}
         className="px-2 py-1 text-center text-xs sm:px-4 sm:py-2 sm:text-sm md:text-base"
       >
         Supprimer

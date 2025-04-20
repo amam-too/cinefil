@@ -4,6 +4,7 @@ import {getCurrentCampaign} from "@/server/services/campaigns";
 import {type VoteForMovieResponse} from "@/types/responses";
 import {type Vote} from "@/types/vote";
 import {createClient} from "@/utils/supabase/server";
+import {revalidatePath} from "next/cache";
 
 /**
  * Votes for one movie.
@@ -12,26 +13,35 @@ import {createClient} from "@/utils/supabase/server";
  */
 export async function voteForProposal(proposalId: number): Promise<VoteForMovieResponse> {
     const supabase = await createClient()
-    
-    const {data: session, error: sessionError} = await supabase.auth.getUser();
-    
-    if (sessionError || !session) {
+    const currentVotes = await getCurrentVotes();
+
+    if (currentVotes.length >= 3) {
+        return {
+            success: false,
+            message: "Tu as déjà voté 3 films. Un choix s'impose.",
+            votes: currentVotes
+        }
+    }
+
+    const {data: userData, error: userError} = await supabase.auth.getUser();
+
+    if (!userData.user?.id || userError) {
         throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
     }
-    
-    const numberOfVotes = await getNumberOfVotesForCurrentUser(session.user.id);
-    
-    if (numberOfVotes >= 3) {
-        throw new Error("Tu as déjà voté pour 3 films. Tu ne peux plus voter.");
-    }
-    
+
+    const user_id = userData.user.id;
+
     const currentCampaign = await getCurrentCampaign();
-    
+
+    if (!currentCampaign) {
+        throw new Error("There is currently no campaign.")
+    }
+
     const {error} = await supabase
         .from("movie_votes")
         .insert({
             movie_proposal_id: proposalId,
-            user_id: session.user.id,
+            user_id: user_id,
             campaign_id: currentCampaign.id,
             vote_value: 1
         });
@@ -39,7 +49,9 @@ export async function voteForProposal(proposalId: number): Promise<VoteForMovieR
     if (error) {
         throw new Error("Une erreur est survenue, merci de réessayer ultérieurement. Le vote n'a pas été pris en compte.");
     }
-    
+
+    revalidatePath("/");
+
     return {
         success: true,
         message: "A voté !"
@@ -53,16 +65,15 @@ export async function voteForProposal(proposalId: number): Promise<VoteForMovieR
  */
 export async function deleteVoteForProposal(movie_proposal_id: number): Promise<VoteForMovieResponse> {
     const supabase = await createClient()
-    
+
     const {data: session, error: sessionError} = await supabase.auth.getUser();
-    
+
     if (sessionError || !session) {
         throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
     }
     
     const currentCampaign = await getCurrentCampaign();
-    
-    // Todo: fix this
+
     const {error} = await supabase
         .from("movie_votes")
         .delete()
@@ -71,10 +82,11 @@ export async function deleteVoteForProposal(movie_proposal_id: number): Promise<
         .eq("campaign_id", currentCampaign.id);
     
     if (error) {
-        console.error(error);
         throw new Error("Une erreur est survenue, merci de réessayer ultérieurement. La suppression du vote n'a pas été pris en compte.");
     }
-    
+
+    revalidatePath("/");
+
     return {
         success: true,
         message: "Vote supprimé avec succès."
@@ -82,83 +94,32 @@ export async function deleteVoteForProposal(movie_proposal_id: number): Promise<
 }
 
 /**
- *  TODO DOC OR REMOVE IF NEVER USED
+ * Returns the votes for the current user.
  */
-export async function getMoviesVotedByUser(): Promise<Vote[]> {
+export async function getCurrentVotes(): Promise<Vote[]> {
     const supabase = await createClient()
-    
-    const {data: session, error: sessionError} = await supabase.auth.getUser();
-    
-    if (sessionError || !session) {
-        return [] as Vote[]
+    const {data: userData, error: userError} = await supabase.auth.getUser();
+
+    if (!userData.user?.id || userError) {
+        throw new Error("User not authenticated.");
     }
-    
+
+    const user_id = userData.user.id;
+
     const currentCampaign = await getCurrentCampaign();
     
     const {data: votes, error: votesError} = await supabase
         .from("movie_votes")
         .select()
-        .eq("user_id", session.user.id)
+        .eq("user_id", user_id)
         .eq("campaign_id", currentCampaign.id);
     
     if (votesError) {
         console.error(votesError)
-        return []
+        throw new Error("Failed to fetch votes for current user.");
     }
     
     return votes as Vote[]
-}
-
-/**
- * TODO DOC OR REMOVE IF NEVER USED
- */
-export async function getAllVotes(): Promise<Vote[]> {
-    const supabase = await createClient();
-
-    let currentCampaign;
-    try {
-        currentCampaign = await getCurrentCampaign();
-    } catch (error) {
-        console.error("Error fetching current campaign:", error);
-        return []; // Return an empty array if fetching the campaign fails
-    }
-
-    if (!currentCampaign) {
-        return []; // Handle the case where getCurrentCampaign returns null or undefined
-    }
-
-    const {data: votes, error: votesError} = await supabase
-        .from("movie_votes")
-        .select()
-        .eq("campaign_id", currentCampaign.id);
-    
-    if (votesError) {
-        console.error("Error fetching votes :", votesError);
-        return [];
-        //throw new Error("Une erreur est survenue lors de la récupération des votes.");
-    }
-    
-    return votes as Vote[];
-}
-
-/**
- * Returns the number of votes for the current user.
- * @returns {Promise<number>}
- */
-async function getNumberOfVotesForCurrentUser(user_id: string): Promise<number> {
-    const supabase = await createClient()
-    
-    const {data: votes, error: votesError} = await supabase
-        .from("movie_votes")
-        .select()
-        .eq("user_id", user_id);
-    
-    if (votesError) {
-        console.error(votesError)
-        return 0
-    }
-    
-    return votes ? votes.length : 0
 }
 
 /**

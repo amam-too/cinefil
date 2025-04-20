@@ -7,7 +7,7 @@ import LoadingWheel from "@/components/ui/loading-wheel";
 import DiscardOneMovieDialog from "@/components/propositions/discard-one-movie-dialog";
 import { login } from "@/app/login/actions";
 import {
-  getCurrentPropositions,
+  getCurrentUserPropositions,
   proposeMovie,
   removeProposition,
 } from "@/server/services/propositions";
@@ -24,9 +24,9 @@ export default function ProposeMovieManager({
   movie,
   initial = false,
 }: ProposeMovieManagerProps) {
-  const [hasProposed, setHasProposed] = useState(initial);
+  const [hasProposed, setHasProposed] = useState<boolean>(initial);
   const [loading, startTransition] = useTransition();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [pendingMovie, setPendingMovie] = useState<EnhancedMovie | null>(null);
 
   /**
@@ -37,7 +37,7 @@ export default function ProposeMovieManager({
       let currentPropositions: Proposition[] = [];
 
       try {
-        currentPropositions = await getCurrentPropositions();
+        currentPropositions = await getCurrentUserPropositions();
       } catch (error: any) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (error.message === "User not authenticated") {
@@ -109,7 +109,8 @@ export default function ProposeMovieManager({
             return msg;
           },
           error: (err: Error) =>
-            err.message ?? "Une erreur est survenue pendant la mise à jour.",
+            err.message ??
+            "Une erreur est survenue pendant la mise à jour de ta proposition.",
         },
       );
     },

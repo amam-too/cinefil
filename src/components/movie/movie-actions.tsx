@@ -1,8 +1,8 @@
 import React from "react";
 import ProposeMovieManager from "@/components/propositions/propose-movie-manager";
-import VoteButton from "@/components/movie-actions/vote-button";
 import { type EnhancedMovie } from "@/server/services/movie";
 import { CalendarBadge } from "@/components/ui/calendar-badge";
+import VoteProposalManager from "@/components/votes/vote-proposal-manager";
 
 interface MovieActionsProps {
   movie: EnhancedMovie;
@@ -28,7 +28,7 @@ export default function MovieActions({ movie, userId }: MovieActionsProps) {
   } else {
     // 3. Show vote button if it's proposed and not displayed.
     return (
-      <VoteButton
+      <VoteProposalManager
         proposalId={movie.movie_proposal_id}
         initial={movie.user_has_voted}
       />
