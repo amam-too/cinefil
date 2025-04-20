@@ -62,31 +62,58 @@ export async function proposeMovie(tmdb_id: number): Promise<ProposeAMovieRespon
  * @param tmdb_id
  */
 export async function removeProposition(tmdb_id: number): Promise<ProposeAMovieResponse> {
-    const supabase = await createClient()
+    const supabase = await createClient();
 
-    const {data: session, error: sessionError} = await supabase.auth.getUser();
+    const { data: session, error: sessionError } = await supabase.auth.getUser();
 
     if (sessionError || !session) {
         throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
     }
 
-    const {error} = await supabase
+    // Step 1: Fetch the proposition to get its ID.
+    const { data: proposition, error: propositionError } = await supabase
         .from("movie_proposals")
-        .delete()
+        .select("id")
         .eq("movie_id", tmdb_id)
         .eq("proposed_by", session.user.id)
-    
-    if (error) {
+        .single();
+
+    if (propositionError || !proposition) {
+        throw new Error("La proposition est introuvable ou ne t'appartient pas.");
+    }
+
+    // Step 2: Check if there are any votes for the proposition.
+    const { count: voteCount, error: votesError } = await supabase
+        .from("movie_votes")
+        .select("*", { count: "exact", head: true }) // `head: true` fetches only count, not actual rows
+        .eq("movie_proposal_id", proposition.id);
+
+    if (votesError) {
+        throw new Error("Erreur lors de la vérification des votes.");
+    }
+
+    if ((voteCount ?? 0) > 0) {
+        throw new Error("Impossible de supprimer une proposition ayant déjà reçu des votes.");
+    }
+
+    // Step 3: Proceed to delete the proposition.
+    const { error: deleteError } = await supabase
+        .from("movie_proposals")
+        .delete()
+        .eq("id", proposition.id);
+
+    if (deleteError) {
         throw new Error("Une erreur est survenue, merci de réessayer ultérieurement. La proposition n'a pas été supprimée.");
     }
 
     revalidatePath("/");
-    
+
     return {
         success: true,
-        message: "Ta proposition a été retirée."
-    }
+        message: "Ta proposition a été retirée.",
+    };
 }
+
 
 /**
  * TODO DOC

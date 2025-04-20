@@ -29,6 +29,14 @@ export default function ProposeMovieManager({
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [pendingMovie, setPendingMovie] = useState<EnhancedMovie | null>(null);
 
+  const propositionHasVotes: boolean = (movie.cinefil_votes_count ?? 0) > 0;
+
+  const buttonText = propositionHasVotes
+    ? "🔒 Déjà soutenue"
+    : hasProposed
+      ? "🗑️ Retirer la proposition"
+      : "🎬 Proposer le film";
+
   /**
    *
    */
@@ -70,6 +78,13 @@ export default function ProposeMovieManager({
    *
    */
   const handleRemove = useCallback(() => {
+    if (propositionHasVotes) {
+      toast.error(
+        "Des utilisateurs ont voté pour cette proposition. Elle ne peut plus être modifiée.",
+      );
+      return;
+    }
+
     toast.promise(removeProposition(movie.id), {
       loading: "On retire ta proposition...",
       success: (res) => {
@@ -117,18 +132,18 @@ export default function ProposeMovieManager({
     [pendingMovie],
   );
 
-  const onClick = hasProposed ? handleRemove : handlePropose;
-
-  const buttonText = hasProposed
-    ? "🗑️ Retirer la proposition"
-    : "🎬 Proposer le film";
-
   return (
     <>
       <Button
-        onClick={onClick}
-        disabled={loading}
-        variant={hasProposed ? "destructive" : "default"}
+        onClick={hasProposed ? handleRemove : handlePropose}
+        disabled={loading || propositionHasVotes}
+        variant={
+          propositionHasVotes
+            ? "ghost"
+            : hasProposed
+              ? "destructive"
+              : "default"
+        }
         className="w-full py-2 text-base font-medium transition-all hover:opacity-90"
       >
         {loading ? <LoadingWheel /> : buttonText}

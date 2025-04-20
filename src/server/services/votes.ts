@@ -123,11 +123,6 @@ export async function getCurrentVotes(): Promise<Vote[]> {
 }
 
 /**
- * Check if the user has already voted for this movie.
- * @param movie_id
- * @param user_id
- */
-/**
  * Check if the user has already voted for this proposal.
  * @param movie_proposal_id
  * @param user_id
