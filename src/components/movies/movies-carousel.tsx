@@ -16,7 +16,9 @@ export default function MoviesCarousel({ movies }: MovieCarouselProps) {
     loop: true,
     dragFree: true,
     align: "center",
-    axis: "x",
+    containScroll: "trimSnaps",
+    slidesToScroll: 1,
+    dragThreshold: 10,
   });
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
@@ -43,10 +45,10 @@ export default function MoviesCarousel({ movies }: MovieCarouselProps) {
   return (
     <section className="embla relative -mx-12">
       <div className="embla__viewport overflow-hidden" ref={emblaRef}>
-        <div className="embla__container flex space-x-4 py-4">
+        <div className="embla__container flex gap-4 py-4 px-4">
           {movies.map((movie) => (
             <div
-              className="embla__slide"
+              className="embla__slide flex-[0_0_auto] min-w-0"
               key={`${new Date().getUTCMilliseconds()}_${movie.id}`}
             >
               <MovieSlide movie={movie} userId={userId} />

@@ -1,6 +1,7 @@
 "use server"
 
-import { createClient } from "@/utils/supabase/server";
+import { withDatabase } from "@/utils/database";
+import { AppError, ErrorCodes, ErrorMessages } from "@/types/errors";
 
 export interface Campaign {
     id: string;
@@ -16,32 +17,29 @@ export interface Campaign {
     created_by: string;
 }
 
-export async function getCurrentCampaign(): Promise<Campaign> {
-    const supabase = await createClient();
-    
-    const now = new Date().toISOString();
-    
-    const {data: campaignData, error: campaignError} = await supabase
-        .from("campaigns")
-        .select()
-        .lte("start_date", now)
-        .order("start_date", {ascending: false})
-        .limit(1);
-    
-    if (!campaignData) {
-        throw new Error("Campaign not found.");
-    }
-    
-    const data = campaignData[0]
-    
-    if (!data) {
-        console.error("No campaign data found.");
-        throw new Error("Campaign not found.");
-    }
-    
-    if (campaignError) {
-        throw new Error("Could not get campaign");
-    }
-    
-    return data as Campaign;
+export async function getCurrentCampaign(): Promise<Campaign | null> {
+    return await withDatabase(async (supabase) => {
+        const now = new Date().toISOString();
+        
+        const { data: campaignData, error: campaignError } = await supabase
+            .from("campaigns")
+            .select()
+            .lte("start_date", now)
+            .order("start_date", { ascending: false })
+            .limit(1);
+        
+        if (campaignError) {
+            console.error("Error fetching campaign:", campaignError);
+            throw new AppError(
+                ErrorMessages[ErrorCodes.DATABASE_ERROR],
+                ErrorCodes.DATABASE_ERROR
+            );
+        }
+        
+        if (!campaignData || campaignData.length === 0) {
+            return null;
+        }
+        
+        return campaignData[0] as Campaign;
+    });
 }

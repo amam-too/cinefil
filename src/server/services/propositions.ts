@@ -1,18 +1,18 @@
 "use server"
 
-import {getCurrentCampaign} from "@/server/services/campaigns";
-import {type EnhancedMovie, getEnhancedMovies} from "@/server/services/movie";
-import {type Proposition} from "@/types/proposition";
-import {type ProposeAMovieResponse} from "@/types/responses";
-import {createClient} from "@/utils/supabase/server";
-import {revalidatePath} from "next/cache";
+import { getCurrentCampaign } from "@/server/services/campaigns";
+import { type EnhancedMovie, getEnhancedMovies } from "@/server/services/movie";
+import { type Proposition } from "@/types/proposition";
+import { type ProposeAMovieResponse } from "@/types/responses";
+import { withDatabase, getUserSession } from "@/utils/database";
+import { AppError, ErrorCodes, ErrorMessages } from "@/types/errors";
+import { revalidatePath } from "next/cache";
 
 /**
  * Propose a movie.
  * @param tmdb_id
  */
 export async function proposeMovie(tmdb_id: number): Promise<ProposeAMovieResponse> {
-    const supabase = await createClient();
     const currentPropositions = await getCurrentUserPropositions();
     
     if (currentPropositions.length >= 3) {
@@ -23,38 +23,40 @@ export async function proposeMovie(tmdb_id: number): Promise<ProposeAMovieRespon
         }
     }
     
-    const {data: userData, error: userError} = await supabase.auth.getUser();
-    
-    if (!userData.user?.id || userError) {
-        throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
-    }
-    
-    const user_id = userData.user.id;
-
+    const user = await getUserSession();
     const currentCampaign = await getCurrentCampaign();
     
     if (!currentCampaign) {
-        throw new Error("There is currently no campaign.")
+        return {
+            success: false,
+            message: ErrorMessages[ErrorCodes.NO_CAMPAIGN],
+            propositions: currentPropositions
+        }
     }
     
-    const {error} = await supabase
-        .from("movie_proposals")
-        .insert({
-            movie_id: tmdb_id,
-            proposed_by: user_id,
-            campaign_id: currentCampaign.id
-        });
-    
-    if (error) {
-        throw new Error("Une erreur est survenue, merci de réessayer ultérieurement. La proposition n'a pas été prise en compte.");
-    }
-    
-    revalidatePath("/");
+    return await withDatabase(async (supabase) => {
+        const { error } = await supabase
+            .from("movie_proposals")
+            .insert({
+                movie_id: tmdb_id,
+                proposed_by: user.id,
+                campaign_id: currentCampaign.id
+            });
+        
+        if (error) {
+            throw new AppError(
+                ErrorMessages[ErrorCodes.DATABASE_ERROR],
+                ErrorCodes.DATABASE_ERROR
+            );
+        }
+        
+        revalidatePath("/");
 
-    return {
-        success: true,
-        message: "Proposition enregistrée !"
-    }
+        return {
+            success: true,
+            message: "Proposition enregistrée !"
+        }
+    });
 }
 
 /**
@@ -62,58 +64,65 @@ export async function proposeMovie(tmdb_id: number): Promise<ProposeAMovieRespon
  * @param tmdb_id
  */
 export async function removeProposition(tmdb_id: number): Promise<ProposeAMovieResponse> {
-    const supabase = await createClient();
+    const user = await getUserSession();
 
-    const { data: session, error: sessionError } = await supabase.auth.getUser();
+    return await withDatabase(async (supabase) => {
+        // Step 1: Fetch the proposition to get its ID.
+        const { data: proposition, error: propositionError } = await supabase
+            .from("movie_proposals")
+            .select("id")
+            .eq("movie_id", tmdb_id)
+            .eq("proposed_by", user.id)
+            .single();
 
-    if (sessionError || !session) {
-        throw new Error("Impossible de lire la session de l'utilisateur. Essayez de vous reconnecter.");
-    }
+        if (propositionError || !proposition) {
+            throw new AppError(
+                "La proposition est introuvable ou ne t'appartient pas.",
+                ErrorCodes.VALIDATION_ERROR
+            );
+        }
 
-    // Step 1: Fetch the proposition to get its ID.
-    const { data: proposition, error: propositionError } = await supabase
-        .from("movie_proposals")
-        .select("id")
-        .eq("movie_id", tmdb_id)
-        .eq("proposed_by", session.user.id)
-        .single();
+        // Step 2: Check if there are any votes for the proposition.
+        const { count: voteCount, error: votesError } = await supabase
+            .from("movie_votes")
+            .select("*", { count: "exact", head: true })
+            .eq("movie_proposal_id", proposition.id);
 
-    if (propositionError || !proposition) {
-        throw new Error("La proposition est introuvable ou ne t'appartient pas.");
-    }
+        if (votesError) {
+            throw new AppError(
+                "Erreur lors de la vérification des votes.",
+                ErrorCodes.DATABASE_ERROR
+            );
+        }
 
-    // Step 2: Check if there are any votes for the proposition.
-    const { count: voteCount, error: votesError } = await supabase
-        .from("movie_votes")
-        .select("*", { count: "exact", head: true }) // `head: true` fetches only count, not actual rows
-        .eq("movie_proposal_id", proposition.id);
+        if ((voteCount ?? 0) > 0) {
+            throw new AppError(
+                "Impossible de supprimer une proposition ayant déjà reçu des votes.",
+                ErrorCodes.VALIDATION_ERROR
+            );
+        }
 
-    if (votesError) {
-        throw new Error("Erreur lors de la vérification des votes.");
-    }
+        // Step 3: Proceed to delete the proposition.
+        const { error: deleteError } = await supabase
+            .from("movie_proposals")
+            .delete()
+            .eq("id", proposition.id);
 
-    if ((voteCount ?? 0) > 0) {
-        throw new Error("Impossible de supprimer une proposition ayant déjà reçu des votes.");
-    }
+        if (deleteError) {
+            throw new AppError(
+                ErrorMessages[ErrorCodes.DATABASE_ERROR],
+                ErrorCodes.DATABASE_ERROR
+            );
+        }
 
-    // Step 3: Proceed to delete the proposition.
-    const { error: deleteError } = await supabase
-        .from("movie_proposals")
-        .delete()
-        .eq("id", proposition.id);
+        revalidatePath("/");
 
-    if (deleteError) {
-        throw new Error("Une erreur est survenue, merci de réessayer ultérieurement. La proposition n'a pas été supprimée.");
-    }
-
-    revalidatePath("/");
-
-    return {
-        success: true,
-        message: "Ta proposition a été retirée.",
-    };
+        return {
+            success: true,
+            message: "Ta proposition a été retirée.",
+        };
+    });
 }
-
 
 /**
  * TODO DOC
@@ -121,47 +130,47 @@ export async function removeProposition(tmdb_id: number): Promise<ProposeAMovieR
  * @param campaign_id
  */
 export async function getPropositionById(proposition_id: number, campaign_id: number): Promise<Proposition> {
-    const supabase = await createClient()
+    return await withDatabase(async (supabase) => {
+        const { data, error } = await supabase
+            .from("movie_proposals")
+            .select()
+            .eq("id", proposition_id)
+            .eq("campaign_id", campaign_id)
+            .single();
 
-    const {data, error} = await supabase
-        .from("movie_proposals")
-        .select()
-        .eq("id", proposition_id)
-        .eq("campaign_id", campaign_id)
-        .single();
+        if (error || !data) {
+            throw new AppError(
+                "Le film n'est pas proposé dans la campagne actuelle.",
+                ErrorCodes.VALIDATION_ERROR
+            );
+        }
 
-    if (error || !data) {
-        throw new Error("Le film n'est pas proposé dans la campagne actuelle.");
-    }
-
-    return data as Proposition;
+        return data as Proposition;
+    });
 }
 
 /**
  * Returns the propositions for the current user.
  */
 export async function getCurrentUserPropositions(): Promise<Proposition[]> {
-    const supabase = await createClient()
-    const {data: userData, error: userError} = await supabase.auth.getUser();
+    const user = await getUserSession();
     
-    if (!userData.user?.id || userError) {
-        throw new Error("User not authenticated.");
-    }
-    
-    const user_id = userData.user.id;
-    
-    const {data: propositions, error: propositionsError} = await supabase
-        .from("movie_proposals")
-        .select()
-        .eq("proposed_by", user_id)
-        .is("shown_at", null);
-    
-    if (propositionsError) {
-        console.error(propositionsError);
-        throw new Error("Failed to fetch propositions for current user.");
-    }
-    
-    return propositions as Proposition[];
+    return await withDatabase(async (supabase) => {
+        const { data: propositions, error: propositionsError } = await supabase
+            .from("movie_proposals")
+            .select()
+            .eq("proposed_by", user.id)
+            .is("shown_at", null);
+        
+        if (propositionsError) {
+            throw new AppError(
+                ErrorMessages[ErrorCodes.DATABASE_ERROR],
+                ErrorCodes.DATABASE_ERROR
+            );
+        }
+        
+        return propositions as Proposition[];
+    });
 }
 
 /**
@@ -169,21 +178,21 @@ export async function getCurrentUserPropositions(): Promise<Proposition[]> {
  * Fetch only movies ids with non-null "shown_at".
  */
 export async function fetchShownMoviesIds(): Promise<{ movie_id: number; shown_at: string }[]> {
-    const supabase = await createClient();
+    return await withDatabase(async (supabase) => {
+        const { data, error } = await supabase
+            .from("movie_proposals")
+            .select("movie_id, shown_at")
+            .not("shown_at", "is", null)
+            .lt("shown_at", new Date().toISOString())
+            .order("shown_at", { ascending: false });
 
-    const { data, error } = await supabase
-        .from("movie_proposals")
-        .select("movie_id, shown_at")
-        .not("shown_at", "is", null)
-        .lt("shown_at", new Date().toISOString())
-        .order("shown_at", { ascending: false });
-
-    if (error) {
-        console.error("Error fetching shown movies:", error.message);
-        return [];
-    }
-    
-    return data;
+        if (error) {
+            console.error("Error fetching shown movies:", error.message);
+            return [];
+        }
+        
+        return data;
+    });
 }
 
 /**
@@ -206,25 +215,25 @@ export async function getShownMovies(): Promise<EnhancedMovie[]> {
  * Returns the propositions, shuffled randomly.
  */
 export async function getPropositions(): Promise<Proposition[]> {
-    const supabase = await createClient();
+    return await withDatabase(async (supabase) => {
+        const { data, error } = await supabase
+            .from("movie_proposals")
+            .select()
+            .is("shown_at", null);
 
-    const { data, error } = await supabase
-        .from("movie_proposals")
-        .select()
-        .is("shown_at", null);
+        if (error || !data) {
+            console.error(error);
+            return [];
+        }
 
-    if (error || !data) {
-        console.error(error);
-        return [];
-    }
+        const shuffled = [...data];
 
-    const shuffled = [...data];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
 
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-
-    return shuffled as Proposition[];
+        return shuffled as Proposition[];
+    });
 }
 
